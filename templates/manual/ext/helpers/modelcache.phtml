@@ -1,0 +1,26 @@
+<div id="content">
+	<h1 class="headline">ModelCache</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/helpers/ModelCache.class.php</em></div>
+	
+	<p>The ModelCache class is an extension of the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreModelHelper/">CoreModelHelper</a> class that's used to load data from the cache and save it back to the cache if the cache load failed.</p>
+	<p>The cache helper has a <strong>preLoad</strong> event method that attempts to load the data from the cache, and a <strong>postLoad</strong> event method that saves the data back to the cache. One can be initialized without the other.</p>
+	
+	<br />
+	
+	<h2>Run Time Example</h2>
+	<?php print Markup::formatCode('
+		//set up the cache helper to attempt to load the data from the cache and to recache on failure
+		AppLoader::includeExtension(\'helpers/\', \'ModelCache\');
+		$objUser->appendHelper(\'cache\', \'ModelCache\');
+		$objUser->initHelper(\'cache\', array(\'preLoad\', \'postLoad\'), array(\'Namespace\' => \'test\', \'Expire\' => 60));
+		
+		if ($objUser->load(array(\'Limit\' => 2), true)) {
+		    while (list(, $objRecord) = $objUser->each()) {
+		        print \'username = \' . $objRecord->get(\'username\') . \'<br />\';
+		    }			
+		}
+		
+		//destroy the cache helper otherwise it will be applied to subsequent object loads
+		$objUser->destroyHelper(\'cache\');
+	'); ?>
+</div>

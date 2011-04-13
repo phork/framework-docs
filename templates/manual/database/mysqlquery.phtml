@@ -1,0 +1,108 @@
+<div id="content">
+	<h1 class="headline">MySqlQuery</h1>
+	<div id="filepath">Filepath: <em>phork/php/database/mysql/MySqlQuery.class.php</em></div>
+	
+	<p>The MySqlQuery class is used to generate queries for MySQL databases. Using the query generator isn't required, but it handles things like escaping strings automatically and helps make the application more portable.</p>
+	<p>There are two ways that a query can be generated. The longer way, which is slightly quicker but harder to read, or the shorter daisy-chained way, which is a bit slower but often times easier to read for simple queries.</p>
+	
+	<br />
+	
+	<h2>Select Query Example</h2>
+	<?php print Markup::formatCode('
+		//get the query object from the database object
+		$objQuery = AppRegistry::get(\'Database\')->getQuery();
+		
+		//if there\'s a chance that the query object is in use, clone it
+		$objQuery = clone $objQuery;
+		
+		//short daisy-chained format
+		$strQuery = $objQuery->select()->from(\'foo\')->where(\'id\', $intId)->buildQuery();
+	
+		//long format with a table join, count function, group by, having, and limit
+		$objQuery->initSelectQuery();
+		$objQuery->addTable(\'file\');
+		$objQuery->addTableJoin(\'folder\', null, \'folderid\', \'LEFT JOIN\');
+		$objQuery->addColumn(\'file.*\');
+		$objQuery->addColumn(\'folder.fullpath\');
+		$objQuery->addColumn(\'folder.hashlevel\');
+		$objQuery->addColumn($objQuery->buildFunction(\'COUNT\', \'*\'), \'tally\');
+		$objQuery->addWhere(\'image\', 1);
+		$objQuery->addWhere(\'width\', 400, \'>\');
+		$objQuery->addGroupBy(\'type\');
+		$objQuery->addHaving(\'tally\', 3, \'>\');
+		$objQuery->addLimit(3);
+		$strQuery = $objQuery->buildQuery();
+	'); ?>
+	
+	
+	<h2>Insert Query Example</h2>
+	<?php print Markup::formatCode('
+		$objDb = AppRegistry::get(\'Database\');
+		$objQuery = $objDb->getQuery();
+		
+		//initialize a new insert query
+		$objQuery->initInsertQuery();
+		$objQuery->addTable(\'foo\');
+		$objQuery->addColumn(\'title\', $strTitle);
+		$objQuery->addColumn(\'body\', $strBody);
+		$objQuery->addColumn(\'created\', date($objDb->getDatetimeFormat());
+		$strQuery = $objQuery->buildQuery();
+	'); ?>
+	
+	
+	<h2>Update Query Example</h2>
+	<?php print Markup::formatCode('
+		$objDb = AppRegistry::get(\'Database\');
+		$objQuery = $objDb->getQuery();
+		
+		//initialize a new update query
+		$objQuery->initUpdateQuery();
+		$objQuery->addTable(\'foo\');
+		$objQuery->addColumn(\'title\', $strTitle);
+		$objQuery->addColumn(\'body\', $strBody);
+		$objQuery->addColumn(\'updated\', date($objDb->getTimestampFormat());
+		$objQuery->addWhere(\'fooid\', $intId);
+		$strQuery = $objQuery->buildQuery();
+	'); ?>
+	
+	
+	<h2>Insert Multiple Records Example</h2>
+	<?php print Markup::formatCode('
+		$objQuery = AppRegistry::get(\'Database\')->getQuery();
+		$objQuery->initInsertQuery();
+		$objQuery->addColumn(\'foo\', null);
+		
+		//create an insert query object for the first record
+		$objClone = clone $objQuery();
+		$objClone->initInsertQuery();
+		$objClone->addColumn(\'foo\', \'fooval1\');
+		$arrQuery[] = $objClone;
+		
+		//create an insert query object for the second record
+		$objClone = clone $objQuery();
+		$objClone->initInsertQuery();
+		$objClone->addColumn(\'foo\', \'fooval2\');
+		$arrQuery[] = $objClone;
+		
+		$strQuery = $objQuery->buildInsertMultiQuery($arrQuery);
+	'); ?>
+	
+	
+	<h2>Insert or Update on Duplicate Key Query Example</h2>
+	<?php print Markup::formatCode('
+		$objQuery = AppRegistry::get(\'Database\')->getQuery();
+		
+		//create the insert query object
+		$objQuery->initInsertQuery();
+		$objQuery->addTable(\'demo\');
+		$objQuery->addColumn(\'foo\', \'fooval\');
+		$objQuery->addColumn(\'bar\', \'barval\');
+		
+		//create the update on duplicate key query object
+		$objUpdate = clone $objQuery;
+		$objUpdate->initUpdateQuery();
+		$objUpdate->addColumn(\'baz\', \'bazval\'); 
+		
+		$strQuery = $objQuery->buildInsertOrUpdateQuery($objUpdate);
+	'); ?>
+</div>

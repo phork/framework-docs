@@ -1,0 +1,49 @@
+<div id="content">
+	<h1 class="headline">CoreEvent</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreEvent.class.php</em> and <em>phork/php/app/AppEvent.class.php</em></div>
+
+	<p>The CoreEvent class is used to register and run events throughout the application. An event consists of one or more callback functions. Its most common use is to register and run the <a href="<?php echo($strBaseUrl); ?>/manual/overview/hooks/">hooks</a> in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>.</p>
+	<p>To register an event the <strong>register()</strong> method should be passed an event name followed by the same parameters as <a href="http://us.php.net/call_user_func_array" rel="external">call_user_func_array()</a>, which is a callback function, and (optionally) the array of arguments to pass to the callback function.</p>
+	<p>To run an event the <strong>run()</strong> method should be passed an event name. By default it's not considered an error if the event being run doesn't exist, however an optional second argument can force an exception to be thrown for a non-existant event. The <strong>run()</strong> method returns an array of all the results from each event merged into a single array. This means if multiple events return the same results then the final result will only contain the last event's results.</p>
+	<p>The event class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<br />
+	
+	<h2>Basic Example</h2>	
+	<?php print Markup::formatCode('
+		//register an event to run AppDisplay::getInstance()->appendString(\'content\', \'bar\');
+		AppEvent::register(\'foo\', array(AppDisplay::getInstance(), \'appendString\'), array(\'content\', \'bar\'));
+	
+		//run the foo event which will append the string "bar" to the content output
+		AppEvent::run(\'foo\');
+	'); ?>
+	
+	
+	<h2>Results Example</h2>
+	<?php print Markup::formatCode('
+		function myFoo() {
+		    return array(
+		        \'Foo\' => \'foo\',
+		        \'Baz\' => \'baz\'
+		    );
+		}
+		
+		function myBar() {
+		    return array(
+		        \'Bar\' => \'bar\',
+		        \'Baz\' => \'abc\'
+		    );
+		}
+		
+		//register the foo event to run the myFoo() and myBar() functions
+		AppEvent::register(\'foo\', \'myFoo\');
+		AppEvent::register(\'foo\', \'myBar\');
+		
+		//run the foo event and get the results
+		$arrResult = AppEvent::run(\'foo\');
+		
+		print $arrResult[\'Foo\']; //foo
+		print $arrResult[\'Bar\']; //bar
+		print $arrResult[\'Baz\']; //abc
+	'); ?>
+</div>

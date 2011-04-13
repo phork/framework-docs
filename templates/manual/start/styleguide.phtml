@@ -1,0 +1,51 @@
+<div id="content">
+	<h1 class="headline">Styleguide</h1>
+	
+	<p>There are several recommended practices for writing custom code to work with Phork. Some are required while others are just suggestions.</p>
+	
+	
+	<h2>Variable Names</h2>
+	<p>Even though PHP is a loosely typed language, Phork does its best to designate each variable type by using a type of <a href="http://en.wikipedia.org/wiki/Hungarian_notation" rel="external">Hungarian notation</a>. The only time this should be ignored is with temporary iterator variables. Example variable names are:</p>
+	<ul>
+		<li>$blnMyBoolean</li>
+		<li>$intMyInteger</li>
+		<li>$strMyString</li>
+		<li>$arrMyArray</li>
+		<li>$objMyObject</li>
+		<li>$numMyFloat</li>
+		<li>$dtmMyUnixTimestamp</li>
+		<li>$rscMyResource</li>
+		<li>$mxdMyVariableThatCanBeMultipleTypes</li>
+	</ul>
+	
+	
+	<h2>Class Naming</h2>
+	<p>All Phork classes should be named like MyClassName.class.php using <a href="http://en.wikipedia.org/wiki/Camel_case" rel="external">UpperCamelCase</a> for both the file name and the class name.</p>
+	
+	
+	<h2>Interface Naming</h2>
+	<p>All Phork interfaces should be named like MyInterfaceName.interface.php using <a href="http://en.wikipedia.org/wiki/Camel_case" rel="external">UpperCamelCase</a> for both the file name and the interface name.</p>
+	
+	
+	<h2>Class Methods</h2>
+	<p>All methods within a class should be named like myClassMethod() using <a href="http://en.wikipedia.org/wiki/Camel_case" rel="external">lowerCamelCase</a>.</p>
+	
+	
+	<h2>Template Naming</h2>
+	<p>All templates should be named like mytemplate.phtml using lowercase with a .phtml extension.</p>
+	
+	
+	<h2>Models Exception</h2>
+	<p>Because models interact with a data source that usually contains lowercase property names the models' properties are usually also lowercase. Their formatting matches that of the data source unless explicitly overridden. When accessing a model record the preferred format is $objRecord->get('lowercase_underscore_property')</p>
+	
+	
+	<h2>Parenthesis (optional)</h2>
+	<p>Opening parenthesis should always be on the same line, and closing parenthesis should always be on a new line.</p>
+	
+	<h2>Comments (optional)</h2>
+	<p>Phork has been commented using <a href="http://en.wikipedia.org/wiki/PHPDoc" rel="external">PHPdoc syntax</a>. It is highly recommended that you comment any custom code using this same syntax.</p>
+	
+	
+	<h2>PHP Tags (optional)</h2>
+	<p>Phork has been written using long PHP tags (&lt;?php) for optimal compatability. It's recommended that this practice be continued in your custom files, however if your server allows it you can still use short tags (&lt? and &lt;?=$foo?&gt;).</p>
+</div>

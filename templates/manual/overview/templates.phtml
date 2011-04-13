@@ -1,0 +1,46 @@
+<div id="content">
+	<h1 class="headline">Templates</h1>
+	
+	<p>Templates are included from the <a href="<?php echo($strBaseUrl); ?>/manual/overview/controllers/">controllers</a> via the <a href="<?php echo($strBaseUrl); ?>/manual/overview/display/">display</a> object, and are used to to build the pages. Each site has its own set of templates located in <em>phork/sites/[sitetype]/templates/</em> and named in lowercase with the extension .phtml.</p>
+	<p>Templates shouldn't actually do any heavy lifting; any data used to build the template should be passed to it, and not retrieved by the template itself.</p>
+	<p>If a template is included from CoreController the <strong>displayNode()</strong> method should be used. If a template is included from another template the <strong>includeTemplateFile()</strong> method should be used.</p>
+
+
+	<h2>Multiple Themes</h2>
+	<p>It's simple to set up your site to use multiple themes. This is useful if you want to give your viewers some theming options, or if you want to redesign your site without interfering with the current theme. The following example shows one way to do it. This will look for an overriding template in the custom theme directory, and if that doesn't exist will fall back to a shared template. This assumes a Theme config variable was defined in <em>site.config.php</em>.</p>
+	
+	<br />
+	
+	<h2>Example (from the controller)</h2>
+	<?php print Markup::formatCode('
+		public function __construct() {
+		    parent::__construct();
+			
+		    $this->assignPageVar(\'strTheme\', $strTheme = AppConfig::get(\'Theme\'));
+		    $this->strThemeDir = ($strTheme ? "themes/{$strTheme}/" : \'\');
+		    $this->strThemeCssDir = \'/css/\' . $this->strThemeDir;
+		    $this->strThemeJsDir = \'/js/\' . $this->strThemeDir;
+		}
+		
+		protected function getTemplatePath($strTemplate) {
+		    if ($this->strThemeDir && file_exists($strThemeTemplateDir = $this->strTemplateDir . $this->strThemeDir . $strTemplate . \'.phtml\')) {
+		        return $strThemeTemplateDir;
+		    } else {
+		        return $this->strTemplateDir . $strTemplate . \'.phtml\';
+		    }
+		}
+		
+		protected function displayFoo() {
+		    $this->assignPageVar(\'arrStylesheets\', array(
+		        AppConfig::get(\'CssUrl\') . $this->strThemeCssDir . \'foo.css\'
+		    ));	
+			
+		    $this->assignPageVar(\'arrJavascript\', array(
+		        AppConfig::get(\'JsUrl\') . $this->strThemeJsDir . \'foo.js\',
+		        AppConfig::get(\'JsUrl\') . $this->strThemeJsDir . \'foobar.js\'
+		    ));
+			
+		    $this->displayNode(\'content\', $this->getTemplatePath(\'example/foo\'));
+		}
+	'); ?>
+</div>

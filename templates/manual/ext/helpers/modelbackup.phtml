@@ -1,0 +1,33 @@
+<div id="content">
+	<h1 class="headline">ModelBackup</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/helpers/ModelBackup.class.php</em></div>
+	
+	<p>The ModelBackup class is a model helper that handles backing up records into a separate table before editing or deleting them. For example if a user needs deleting from the regular table but should exist in a user backup table somewhere.</p>
+	
+	<br />
+	
+	<h2>Example (from a model constructor)</h2>
+	<?php print Markup::formatCode('
+		//back up the record before saving over it
+		if (AppLoader::includeExtension(\'helpers/\', \'ModelBackup\')) {
+		    $this->appendHelper(\'backup\', \'ModelBackup\', array(
+		        \'BackupTable\'	=> \'foo-deleted\'
+		    ));
+		    $this->initHelper(\'backup\', array(\'backupSave\'), array(
+		        \'Batch\'			=> true,
+		        \'Fatal\'			=> false
+		    ));
+		}
+	
+		//back up the record before deleting it
+		if (AppLoader::includeExtension(\'helpers/\', \'ModelBackup\')) {
+		    $this->appendHelper(\'backup\', \'ModelBackup\', array(
+		        \'BackupTable\'	=> \'foo-deleted\'
+		    ));
+		    $this->initHelper(\'backup\', array(\'backupDelete\'), array(
+		        \'Batch\'			=> true,
+		        \'Fatal\'			=> false
+		    ));
+		}
+	'); ?>
+</div>

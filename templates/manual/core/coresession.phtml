@@ -1,0 +1,30 @@
+<div id="content">
+	<h1 class="headline">CoreSession</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreSession.class.php</em></div>
+	
+	<p>The CoreSession class dispatches to a custom session handler which allows the application to store the session data in the database or a cache. Phork comes with a SessionDatabase class in <em>phork/sessions/database/SessionDatabase.class.php</em>.</p>
+	<p>The session handler must implement the SessionHandler interface which can be found at phork/php/core/interfaces/SessionHandler.interface.php.</p>
+	<p>The session class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<br />
+	
+	<h2>Basic Example</h2>
+	<?php print Markup::formatCode('
+		CoreSession::setHandler(new SessionDatabase());
+		session_start();
+	'); ?>
+	
+	
+	<h2>Example (from the bootstrap)</h2>
+	<?php print Markup::formatCode('
+		protected function startSession() {
+		    if (AppConfig::get(\'SessionsEnabled\', false)) {
+		        if ($strSessionHandler = AppConfig::get(\'SessionHandler\', false)) {
+		            AppLoader::includeClass(\'php/core/\', \'CoreSession\');
+		            CoreSession::setHandler(AppLoader::newObject(\'php/ext/sessions/\' . strtolower($strSessionHandler) . \'/\', \'Session\' . $strSessionHandler));
+		        }
+		    }
+		    parent::startSession();
+		}
+	'); ?>
+</div>

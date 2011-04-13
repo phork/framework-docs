@@ -1,0 +1,16 @@
+<div id="content">
+	<h1 class="headline">Date</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Date.class.php</em></div>
+	
+	<p>The Date class is used to generate a formatted date string with the option of returning a "time ago" string for dates that occurred within 24 hours, or an "on [date]" string for dates that fall outside the 24 hour period. For example: "4 hours ago", "16 minutes ago", "on February 13th", etc.</p>
+	<p>The format of the "on [date]" string is determined by an argument passed using the <a href="http://us.php.net/manual/en/function.date.php" rel="external">PHP date format</a>.</p>
+	<p>It can also be used to display formatted dates relative to a user's timezone.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		Date::setClientOffset(-8);
+		print Date::getTimeAgo(strtotime($strDate), 24, \'M d, y @ g:ia\');
+	'); ?>
+</div>

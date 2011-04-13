@@ -1,0 +1,102 @@
+<div id="content">
+	<h1 class="headline">DatabaseManager</h1> 
+	<div id="filepath">Filepath: <em>phork/php/database/DatabaseManager.class.php</em></div>
+	
+	<p>The DatabaseManager class makes it relatively easy to switch between several different read and write database configurations. In order for this to work correctly the additional databases need to be defined in a separate config file than the standard <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#database">database configuration</a>, but they must use the same format.</p>
+	
+	<br />
+	
+	<h2>Inclusion</h2>
+	<p>The database manager isn't included automatically because most sites won't need to use it. The best place to include the class is in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">site bootstrap</a> in the <strong>loadLibs()</strong> method.</p>
+	
+	<?php print Markup::formatCode('
+		class SiteBootstrap extends CoreBootstrap {
+		    protected $strDefaultController = \'SiteController\';
+			
+		    protected function loadLibs() {
+		        parent::loadLibs();
+		        AppLoader::includeClass(\'php/database/\', \'DatabaseManager\');
+		    }
+		}
+	'); ?>
+	
+	<br />
+	
+	<h2>Instantiation</h2>
+	<p>A new database object can be instantiated wherever makes the most sense. One option, if the database is going to be used on every request, would be after the library has been loaded in the bootstrap. Alternately it can be instantiated in a model, a controller, or even a hook.</p>
+	
+	<?php print Markup::formatCode('
+		//instantiate a new database object using config values from [config_dir]/tests/database.config.php
+		$objDatabaseFactory = new DatabaseFactory(\'tests/database\');
+		DatabaseManager::appendDatabase(\'Tests\', $objDatabaseFactory->init());
+	'); ?>
+	
+	<br />
+	
+	<h2>Usage</h2>
+	<p>One possible way to change and revert the database is by using events in the model class. This can also be done using the <a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelDatabase/">ModelDatabase</a> helper.</p>
+	
+	<?php print Markup::formatCode('
+		<?php
+		    require_once(\'php/core/CoreDatabaseModel.class.php\');
+		
+		    class TestDatabaseModel extends CoreDatabaseModel {
+				
+		        public function __construct($arrConfig = array()) {
+		            parent::__construct($arrConfig);
+					
+		            AppEvent::register($this->strEventKey . \'.pre-load\', array(\'DatabaseManager\', \'changeDatabase\'), array(\'Tests\'));
+		            AppEvent::register($this->strEventKey . \'.pre-save\', array(\'DatabaseManager\', \'changeDatabase\'), array(\'Tests\'));
+		            AppEvent::register($this->strEventKey . \'.pre-delete\', array(\'DatabaseManager\', \'changeDatabase\'), array(\'Tests\'));
+					
+		            AppEvent::register($this->strEventKey . \'.post-load\', array(\'DatabaseManager\', \'revertDatabase\'));
+		            AppEvent::register($this->strEventKey . \'.post-save\', array(\'DatabaseManager\', \'revertDatabase\'));
+		            AppEvent::register($this->strEventKey . \'.post-delete\', array(\'DatabaseManager\', \'revertDatabase\'));
+		        }
+		    }
+	'); ?>
+	
+	<p>Another is just by using plain static calls. This example shows how it's possible to stack database changes.</p>
+	
+	<?php print Markup::formatCode('
+		//change from the standard database to the tests database and then to the foo database
+		DatabaseManager::changeDatabase(\'Tests\');
+		DatabaseManager::changeDatabase(\'Foo\');
+		
+		//revert from foo to tests
+		DatabaseManager::revertDatabase();
+		
+		//revert from tests to standard
+		DatabaseManager::revertDatabase();
+	'); ?>
+	
+	<br />
+	
+	<h2>Example config file</h2>
+	
+	<?php print Markup::formatCode('
+		<?php
+		    //the database type must have a corresponding class
+		    $arrConfig[\'Type\'] = \'MySql\';
+		    
+		    //the database connection for reads
+		    $arrConfig[\'Connections\'][\'Read\'] = array(
+		        \'User\'            => \'your_username\',
+		        \'Password\'        => \'your_password\',
+		        \'Host\'            => \'localhost\',
+		        \'Port\'            => 3306,
+		        \'Database\'        => \'phork_tests\',
+		        \'Persistent\'      => false
+		    );
+		    
+		    //the database connection for writes
+		    $arrConfig[\'Connections\'][\'Write\'] = array(
+		        \'User\'            => \'your_username\',
+		        \'Password\'        => \'your_password\',
+		        \'Host\'            => \'localhost\',
+		        \'Port\'            => 3306,
+		        \'Database\'        => \'phork_tests\',
+		        \'Persistent\'      => false
+		    );
+	'); ?>
+</div>

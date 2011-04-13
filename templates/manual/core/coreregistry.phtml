@@ -1,0 +1,17 @@
+<div id="content">
+	<h1 class="headline">CoreRegistry</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreRegistry.class.php</em> and <em>phork/php/app/AppRegistry.class.php</em></div>
+	
+	<p>The CoreRegistry object is used to store objects that should be accessible throughout the application. It's a replacement for global variables. There are a few reserved names that can't be used in the registry because they're used by the system. They are <strong>Error</strong>, <strong>Database</strong>, <strong>Cache</strong>, <strong>Controller</strong>, and <strong>Url</strong>.</p>
+	<p>The registry class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		AppRegistry::register(\'MyObject\', new MyObject());
+		$objMyObject = AppRegistry::get(\'MyObject\');
+		
+		AppRegistry::destroy(\'MyObject\');
+	'); ?>
+</div>

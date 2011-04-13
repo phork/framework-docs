@@ -1,0 +1,496 @@
+<div id="content">
+	<h1 class="headline">CoreDatabaseModel</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreDatabaseModel.class.php</em></div>
+	
+	<p>The CoreDatabaseModel class is an abstract class that's an extension of the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreModel/">CoreModel</a> class. It's used to load, add, edit and delete data stored in a database.</p>
+	<p>A very basic extension of this class will define the table name and primary key of the database table as well as the names of the columns to insert and update when adding and editing a record. More advanced extensions can take advantage of things like helpers and custom queries with table joins.</p>
+	<p>Note that all load() methods will return true if there were no errors running the select query, even if no records were found. You can use <strong>if ($objModel->count())</strong> to make sure records were returned.</p>
+	
+	<br />
+	
+	<h2>Basic Model Example</h2>
+	<?php print Markup::formatCode('
+		require_once(\'php/core/CoreDatabaseModel.class.php\');
+		
+		class ExampleModel extends CoreDatabaseModel {
+		    
+		    protected $strTable = \'example\';
+		    protected $strPrimaryKey = \'exampleid\';
+		    
+		    protected $arrInsertCols = array(\'userid\', \'title\', \'description\', \'created\', \'updated\');
+		    protected $arrUpdateCols = array(\'userid\', \'title\', \'description\', \'updated\');
+		    
+		    
+		    /**
+		     * A shortcut function to load the records by the
+		     * user ID. This does not clear out any previously
+		     * loaded data. That should be done explicitly.
+		     *
+		     * @access public
+		     * @param integer $intUserId The user ID to load by
+		     * @return boolean True if the query executed successfully
+		     */
+		    public function loadByUserId($intUserId) {
+		        $arrFunctionArgs = func_get_args();
+		        $this->setLoading(__FUNCTION__, $arrFunctionArgs);
+		        
+		        $blnResult = $this->load(array(
+		            \'Conditions\' => array(
+		                array(
+		                    \'Column\' => \'userid\',
+		                    \'Value\'  => $intUserId
+		                )
+		            )        
+		        ));
+		        
+		        $this->clearLoading();
+		        return $blnResult;
+		    }
+		}
+	'); ?>
+	
+	
+	<h2>User Model With Helpers (also see <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreRecord/#userrecord">UserRecord</a> example and the <a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelValidation/">ModelValidation</a> and <a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelRelations/">ModelRelations</a> helpers)</h2>
+	<?php print Markup::formatCode('
+		require_once(\'php/core/CoreDatabaseModel.class.php\');
+		
+		class UserModel extends CoreDatabaseModel {
+		    
+		    protected $strRecordClass = \'UserRecord\';
+		    
+		    protected $strTable = \'users\';
+		    protected $strPrimaryKey = \'userid\';
+		    
+		    protected $arrInsertCols = array(\'username\', \'password\', \'email\', \'firstname\', \'lastname\', \'displayname\', \'birthdate\',  
+		                                     \'timezone\', \'countryid\', \'location\', \'url\', \'blurb\', \'avatar\', \'roles\', \'verified\', 
+		                                     \'created\', \'updated\');
+		                                     
+		    protected $arrUpdateCols = array(\'password\', \'email\', \'firstname\', \'lastname\', \'displayname\', \'birthdate\', \'timezone\', 
+		                                     \'countryid\', \'location\', \'url\', \'blurb\', \'avatar\', \'roles\', \'verified\', \'updated\');
+		    
+		    
+		    /**
+		     * Initializes the model and includes the password
+		     * helper utility.
+		     *
+		     * @access public
+		     * @param array $arrConfig The config vars, including which helpers to use
+		     */
+		    public function __construct($arrConfig = array()) {
+		        parent::__construct($arrConfig);
+		        AppLoader::includeUtility(\'PasswordHelper\');
+		    }
+		    
+		    
+		    /**
+		     * Sets up a pre-save event to set the default record
+		     * values, initializes the validation helper if the
+		     * Validate flag is passed in the config array, and
+		     * initializes the relations helper if the Relations
+		     * flag is passed in the config. The relations with the
+		     * AutoLoad flag set to true will be loaded automatically
+		     * if the RelationsAutoLoad flag is passed in the config.
+		     * Relations are loaded after the load() method has been
+		     * called.
+		     *
+		     * @access public
+		     * @param array $arrConfig The config vars, including which helpers to use
+		     */
+		    public function init($arrConfig) {
+		        parent::init($arrConfig);    
+		        AppEvent::register($this->strEventKey . \'.pre-save\', array($this, \'setDefaults\'));
+		        
+		        if (!empty($arrConfig[\'Validate\'])) {
+		            if (AppLoader::includeExtension(\'helpers/\', \'ModelValidation\')) {
+		                $this->appendHelper(\'validation\', \'ModelValidation\', array(
+		                    \'Id\'             => array(
+		                        \'Property\'      => \'userid\',
+		                        \'Unique\'        => true,
+		                        \'Type\'          => \'integer\',
+		                        \'Error\'         => \'Invalid ID\'
+		                    ),
+		                    
+		                    \'Username\'       => array(
+		                        \'Property\'      => \'username\',
+		                        \'Unique\'        => true,
+		                        \'Required\'      => true,
+		                        \'Type\'          => \'string\',
+		                        \'RegEx\'         => \'/^[0-9a-z]{3,15}$/i\',
+		                        \'Error\'         => \'Invalid username. It must be between 3 and 15 characters in length, containing only a-z and 0-9.\',
+		                    ),
+		            
+		                    \'Password\'       => array(
+		                        \'Property\'      => \'password_plaintext\',
+		                        \'Required\'      => false,
+		                        \'Type\'          => \'string\',
+		                        \'Error\'         => \'Invalid password. It must be at least 5 characters long.\',
+		                        \'MinLength\'     => 5
+		                    ),
+		                    
+		                    \'PasswordAgain\'  => array(
+		                        \'Function\'      => \'validatePassword\',
+		                        \'Error\'         => \'Invalid password verification\'
+		                    ),
+		                    
+		                    \'Email\'          => array(
+		                        \'Property\'      => \'email\',
+		                        \'Unique\'        => true,
+		                        \'Required\'      => true,
+		                        \'Type\'          => \'email\',
+		                        \'CheckMx\'       => false,
+		                        \'Error\'         => \'Missing or invalid email address\'
+		                    ),
+		                    
+		                    \'FirstName\'      => array(
+		                        \'Property\'      => \'firstname\',
+		                        \'Required\'      => false,
+		                        \'Type\'          => \'string\',
+		                        \'Error\'         => \'Invalid first name\'
+		                    ),
+		                    
+		                    \'LastName\'       => array(
+		                        \'Property\'      => \'lastname\',
+		                        \'Required\'      => false,
+		                        \'Type\'          => \'string\',
+		                        \'Error\'         => \'Invalid last name\'
+		                    ),
+		                    
+		                    \'DisplayName\'    => array(
+		                        \'Property\'      => \'displayname\',
+		                        \'Required\'      => true,
+		                        \'Type\'          => \'string\',
+		                        \'Error\'         => \'Missing or invalid display name\'
+		                    ),
+		                    
+		                    \'Birthdate\'      => array(
+		                        \'Property\'      => \'birthdate\',
+		                        \'Required\'      => false,
+		                        \'Type\'          => \'string\',
+		                        \'RegEx\'         => \'/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/\',
+		                        \'Error\'         => \'Invalid birthdate\'
+		                    ),
+		                    
+		                    \'Timezone\'       => array(
+		                        \'Property\'      => \'timezone\',
+		                        \'Required\'      => false,
+		                        \'Type\'          => \'float\',
+		                        \'Error\'         => \'Invalid timezone\'
+		                    ),
+		                    
+		                    \'CountryId\'      => array(
+		                        \'Property\'      => \'countryid\',
+		                        \'Required\'      => true,
+		                        \'Type\'          => \'integer\',
+		                        \'Error\'         => \'Missing or invalid country\'
+		                    ),
+		                    
+		                    \'Location\'       => array(
+		                        \'Property\'      => \'location\',
+		                        \'Required\'      => false,
+		                        \'Type\'          => \'string\',
+		                        \'Error\'         => \'Invalid location\'
+		                    ),
+		                    
+		                    \'Roles\'          => array(
+		                        \'Property\'      => \'roles\',
+		                        \'Type\'          => \'integer\',
+		                        \'Error\'         => \'Invalid roles\'
+		                    ),
+		                ));
+		                
+		                $this->initHelper(\'validation\', array(\'validateAll\'));
+		            }
+		        }
+		        
+		        if (!empty($arrConfig[\'Relations\'])) {
+		            if (AppLoader::includeExtension(\'helpers/\', \'ModelRelations\')) {
+		                $this->appendHelper(\'relations\', \'ModelRelations\', array(
+		                    \'HasMany\'        => array(
+		                        \'Roles\'          => array(
+		                            \'LoadAs\'        => \'rolelist\',
+		                            \'AutoLoad\'      => true,
+		                            \'ClassName\'     => \'RoleModel\',
+		                            \'Dependent\'     => false,
+		                            \'Conditions\'    => array(
+		                                array(
+		                                    \'Column\'    => \'1 << roleid - 1\',
+		                                    \'Property\'  => \'roles\',
+		                                    \'Operator\'  => \'&\',
+		                                    \'NoQuote\'   => true
+		                                )
+		                            )
+		                        ),
+		                        
+		                        \'Blogs\'          => array(
+		                            \'LoadAs\'        => \'blogs\',
+		                            \'AutoLoad\'      => false,
+		                            \'ClassName\'     => \'BlogModel\',
+		                            \'Dependent\'     => true,
+		                            \'Conditions\'    => array(
+		                                array(
+		                                    \'Column\'    => \'userid\',
+		                                    \'Property\'  => $this->strPrimaryKey,
+		                                    \'Operator\'  => \'=\'
+		                                )
+		                            ),
+		                            \'Order\'         => array(
+		                                array(
+		                                    \'Column\'    => \'published\',
+		                                    \'Sort\'      => \'desc\'
+		                                )
+		                            ),
+		                            \'Config\'        => array(
+		                                \'NoUserJoin\'    => true
+		                            )
+		                        )
+		                    ),
+		                    
+		                    \'HasOne\'         => array(
+		                        \'Country\'        => array(
+		                            \'LoadAs\'        => \'country\',
+		                            \'AutoLoad\'      => false,
+		                            \'ClassName\'     => \'CountryModel\',
+		                            \'Dependent\'     => false,
+		                            \'Conditions\'    => array(
+		                                array(
+		                                    \'Column\'    => \'countryid\',
+		                                    \'Property\'  => \'countryid\',
+		                                    \'Operator\'  => \'=\'
+		                                )
+		                            )
+		                        )    
+		                    )
+		                ));
+		                
+		                if (!empty($arrConfig[\'RelationsAutoLoad\'])) {
+		                    $this->initHelper(\'relations\', array(\'loadAutoLoad\'), array(
+		                        \'Recursion\' => isset($arrConfig[\'RelationsRecursion\']) ? $arrConfig[\'RelationsRecursion\'] : 0
+		                    ));
+		                }
+		            }
+		        }
+		    }
+		    
+		    
+		    /**
+		     * Sets any default values before saving including the
+		     * created and updated dates and the display name.
+		     *
+		     * @access public
+		     */
+		    public function setDefaults() {
+		        $objDb = AppRegistry::get(\'Database\');
+		        $this->current()->set(\'updated\', date($strDatetimeFormat = $objDb->getDatetimeFormat()));
+		        
+		        if (!$this->current()->get(self::ID_PROPERTY)) {
+		            $this->current()->set(\'created\', date($strDatetimeFormat));
+		        }
+		        
+		        if (!$this->current()->get(\'displayname\')) {
+		            $this->current()->set(\'displayname\', $this->current()->get(\'username\'));
+		        }
+		    }
+		
+		
+		    /*****************************************/
+		    /**     LOAD METHODS                    **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * A shortcut function to load a record by username.
+		     * This does not clear out any previously loaded data.
+		     * That should be done explicitly.
+		     *
+		     * @access public
+		     * @param string $strUsername The username to load by
+		     * @return boolean True if the query executed successfully
+		     */
+		    public function loadByUsername($strUsername) {
+		        $arrFunctionArgs = func_get_args();
+		        $this->setLoading(__FUNCTION__, $arrFunctionArgs);
+		        
+		        $blnResult = $this->load(array(
+		            \'Conditions\' => array(
+		                array(
+		                    \'Column\' => \'username\',
+		                    \'Value\'  => $strUsername
+		                )
+		            )        
+		        ));
+		        
+		        $this->clearLoading();
+		        return $blnResult;
+		    }
+		    
+		    
+		    /**
+		     * A shortcut function to load a record by email address.
+		     * This does not clear out any previously loaded data.
+		     * That should be done explicitly.
+		     *
+		     * @access public
+		     * @param string $strEmail The email address to load by
+		     * @return boolean True if the query executed successfully
+		     */
+		    public function loadByEmail($strEmail) {
+		        $arrFunctionArgs = func_get_args();
+		        $this->setLoading(__FUNCTION__, $arrFunctionArgs);
+		        
+		        $blnResult = $this->load(array(
+		            \'Conditions\' => array(
+		                array(
+		                    \'Column\' => \'email\',
+		                    \'Value\'  => $strEmail
+		                )
+		            )        
+		        ));
+		        
+		        $this->clearLoading();
+		        return $blnResult;
+		    }
+		            
+		    
+		    /*****************************************/
+		    /**     VALIDATION METHODS              **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * Validates that password exists for a new user and
+		     * that the password matches the verification.
+		     *
+		     * @access public
+		     * @return boolean True if valid
+		     */
+		    public function validatePassword() {
+		        $objRecord = $this->current();
+		        if (!$objRecord->get(self::ID_PROPERTY) && !$objRecord->get(\'password_plaintext\')) {
+		            return false;
+		        }
+		        return $objRecord->get(\'password_plaintext_again\') == $objRecord->get(\'password_plaintext\');
+		    }
+		}
+	'); ?>
+	
+	
+	<h2>Basic Loading</h2>
+	<?php print Markup::formatCode('
+		AppLoader::includeMode(\'UserModel\');
+		$objUser = new UserModel();
+		
+		//all load methods return true if there were no errors, even if no matching records were found
+		//so you should check $objUser->first() or $objUser->count() to make sure records were found
+		
+		if ($objUser->loadById(42) && $objUserRecord = $objUser->first()) {
+		    $objUserRecord->get(\'firstname\') . \' \' . $objUserRecord->get(\'lastname\');
+		}
+	'); ?>
+	
+	
+	<h2>Basic Loading with Helpers</h2>
+	<?php print Markup::formatCode('
+		if (AppLoader::includeMode(\'UserModel\')) {
+		
+		    //set up the objects to load all the autoload relations
+		    $objUser = new UserModel(array(
+		        \'Relations\'          => true,
+		        \'RelationsAutoLoad\'  => true
+		    ));
+		    
+		    //load a single user with the autoload relations
+		    if ($objUser->loadById(1) && $objUser->count()) {
+		    	
+		        //get the entire record object
+		        $objRecord = $objUser->getRecords()->first();
+		        
+		        //get just the username from the record object
+		        $strUsername = $objUser->getRecords()->first()->getUsername();
+		    }
+		    
+		    //clear out the loaded user
+		    $objUser->clear();
+		    
+		    
+		    //set up the params to load the 31st to 40th users to sign up
+		    $arrParams = array(
+		        \'Order\'    => array(
+		            array(
+		                \'Column\'   => \'created\',
+		                \'Sort\'     => \'ASC\'
+		            )
+		        ),
+		        \'Limit\'    => 10,
+		        \'Offset\'   => 30
+		    );
+				
+		    //load the users and their relations
+		    if ($objUser->load($arrParams)) {
+		        print $objUser->getFoundRows() . \' users found<br />\';
+		        print $objUser->count() . \' users loaded\';
+		    }
+		    
+		    //print each username
+		    while (list(, $objRecord) = $objUser->each()) {
+		        print $objRecord->get(\'username\') . \'<br />\';
+		    }
+		}
+	'); ?>
+	
+	
+	<h2>Basic Saving</h2>
+	<?php print Markup::formatCode('
+		if (AppLoader::includeMode(\'UserModel\')) {
+		    $objUser = new UserModel(array(\'Validate\' => true));
+		    
+		    //import data into the user model
+		    $objUser->import(array(
+		        \'username\'           => \'foo\',
+		        \'password_plaintext\' => \'bar\',
+		        \'email\'              => \'foo@example.com\',
+		        \'birthdate\'          => \'1979-01-01\'
+		    ));
+		    
+		    //save the record
+		    $blnResult = $objUser->save();
+		}
+	'); ?>
+
+	
+	
+	<h2>Specific Relations</h2>
+	<?php print Markup::formatCode('
+		//set up the relations in the user model but don\'t set up the autoloader
+		$objUser = new UserModel(array(
+		    \'Relations\' => true
+		));
+		
+		//set up the object to load the users\' roles and their blogs
+		$objUser->initHelper(\'relations\', array(\'loadSpecific\'), array(
+		    \'Relations\' => array(\'HasMany.Roles\', \'HasMany.Blogs\')
+		));
+		
+		//load the user with the relationships
+		if ($objUser->loadById(1) && $objRecord = $objUser->first()) {
+		   print \'<pre>\' . print_r($objRecord, 1) . \'</pre>\';
+		}
+	'); ?>
+	
+	
+	<h2>Cache Helper</h2>
+	<?php print Markup::formatCode('
+		//set up the cache helper to attempt to load the data from the cache and to recache on failure
+		AppLoader::includeExtension(\'helpers/\', \'ModelCache\');
+		$objUser->appendHelper(\'cache\', \'ModelCache\');
+		$objUser->initHelper(\'cache\', array(\'preLoad\', \'postLoad\'), array(\'Namespace\' => \'test\', \'Expire\' => 60));
+		
+		if ($objUser->load(array(\'Limit\' => 2), true)) {
+		    while (list(, $objRecord) = $objUser->each()) {
+		        print \'username = \' . $objRecord->get(\'username\') . \'<br />\';
+		    }			
+		}
+		
+		//destroy the cache helper otherwise it will be applied to subsequent object loads
+		$objUser->destroyHelper(\'cache\');
+	'); ?>
+</div>

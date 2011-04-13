@@ -1,0 +1,84 @@
+<div id="content">
+	<h1 class="headline">XmlBuilder</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/XmlBuilder.class.php</em></div>
+	
+	<p>The XmlBuilder class converts an array or an object into XML format using the <a href="http://us.php.net/domdocument" rel="external">PHP DomDocument class</a>. It generally tries to do an array key to XML node mapping, but if an array has numeric keys (eg. a list of tags) there's the option to pass in an array that defines how the child nodes are named. If no array is passed or no match is found the numeric keys are prefixed with a string, which defaults to <em>node</em> but can be also be overridden. Additionally there's the option to pass a callback function to format each node name if, for example, they should be converted to lowercase.</p>
+	
+	<br />
+		
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		//a sample array to convert to XML
+		$arrBlogData = array(
+		    array(
+		        \'Title\' 	=> \'Blog Title A\',
+		        \'Body\'	=> \'Lorum ipsum dolor...\',
+		        \'Tags\'	=> array(\'foo\', \'bar\', \'baz\')
+		    ),
+			
+		    array(
+		        \'Title\' 	=> \'Blog Title B\',
+		        \'Body\'	=> \'Lorum ipsum dolor...\',
+		        \'Tags\'	=> array(\'red\', \'orange\', \'yellow\')
+		    ),
+			
+		    array(
+		        \'Title\' 	=> \'Blog Title B\',
+		        \'Body\'	=> \'Lorum ipsum dolor...\',
+		        \'Tags\'	=> array(\'michael\', \'lindsay\', \'buster\', \'gob\')
+		    )
+		);
+		
+		/* 
+		    name the top node "root", convert each node name to lowercase, name the
+		    nodes under the root node "blog", and the nodes under the tags node "tag"
+		    all other undefined nodes are prefixed with the term "node" eg. node1
+		*/
+				
+		AppLoader::includeUtility(\'XmlBuilder\');
+		$objXml = new XmlBuilder($arrBlogData, array(
+		    \'root\'		=> \'blog\',
+		    \'tags\'		=> \'tag\',
+		), \'root\', \'node\', \'strtolower\');
+		
+		//send the right header to the display object and set the built xml as the page content
+		AppDisplay::getInstance()->appendHeader(\'Content-Type: text/xml\');
+		AppDisplay::getInstance()->appendString(\'content\', $objXml->getXml());
+	'); ?>
+	
+	
+	<h2>Output</h2>
+	<?php print Markup::formatCode('
+		<?xml version="1.0"?>
+		<root>
+		  <blog>
+		    <title>Blog Title A</title>
+		    <body>Lorum ipsum dolor...</body>
+		    <tags>
+		      <tag>foo</tag>
+		      <tag>bar</tag>
+		      <tag>baz</tag>
+		    </tags>
+		  </blog>
+		  <blog>
+		    <title>Blog Title B</title>
+		    <body>Lorum ipsum dolor...</body>
+		    <tags>
+		      <tag>red</tag>
+		      <tag>orange</tag>
+		      <tag>yellow</tag>
+		    </tags>
+		  </blog>
+		  <blog>
+		    <title>Blog Title B</title>
+		    <body>Lorum ipsum dolor...</body>
+		    <tags>
+		      <tag>michael</tag>
+		      <tag>lindsay</tag>
+		      <tag>buster</tag>
+		      <tag>gob</tag>
+		    </tags>
+		  </blog>
+		</root>
+	'); ?>
+</div>

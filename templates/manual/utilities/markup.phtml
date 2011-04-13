@@ -1,0 +1,28 @@
+<div id="content">
+	<h1 class="headline">Markup</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Markup.class.php</em></div>
+	
+	<p>The Markup class is used to strip HTML tags and replace <a href="http://en.wikipedia.org/wiki/Bbcode" rel="external">BBcode</a> with HTML. It can also be used to format code so the tags are displayed rather than parsed.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		print Markup::replaceTags(\'[b]This is bold![/b]\');
+		print Markup::replaceTags(\'[u]This is underlined![/u]\');
+		print Markup::replaceTags(\'[i]This is italic![/i]\');
+		
+		print Markup::replaceTags(\'[url=http://www.example.org]This is a link![/url]\');
+		print Markup::replaceTags(\'[img]http://www.example.org/image.gif[/img]\');
+		print Markup::replaceTags(\'[tab]\');
+		
+		print Markup::replaceTags(\'[url=http://www.example.org" onclick="javascript:alert(1);"]This will intentionally break![/url]\');
+	'); ?>
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		print Markup::formatCode(\'
+		    <p>This is <?php echo($strAdjective); ?>!</p>
+		\');
+	'); ?>
+</div>

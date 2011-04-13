@@ -1,0 +1,28 @@
+<div id="content">
+	<h1 class="headline">FileHelper</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/FileHelper.class.php</em></div>
+	
+	<p>The FileHelper class handles uploaded files and has additional file system checks before tying into the file system helper object to permanently save the file.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		AppLoader::includeUtility(\'FileHelper\');
+		if (($arrFiles = FileHelper::getUploadedFiles()) && !empty($arrFiles[\'image\'])) {
+		    if ($arrFiles[\'image\'][\'size\'] <= $intMaxFileSize) {
+		        if ($strExt = FileHelper::isValidImage($arrFiles[\'image\'], array(\'png\', \'gif\', \'jpg\'))) {
+		            $strFileName = "{$intUserId}.{$strExt}";
+		            $strFilePath = $objFileSystem->getHashDirectory(AppConfig::get(\'PublicFilePath\'), $strFileName, 5) . $strFileName;
+		            if (FileHelper::saveUploadedFile($arrFiles[\'image\'][\'tmp_name\'], $strFilePath, true)) {
+		                return true;
+		            }
+		        } else {
+		            trigger_error(AppLanguage::translate(\'The image must be a PNG, GIF or JPG file\'));
+		        }
+		    } else {
+		        trigger_error(AppLanguage::translate(\'The image must be less than %s\', \'400k\'));
+		    }
+		} 
+	'); ?>
+</div>

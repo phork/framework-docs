@@ -1,0 +1,55 @@
+<div id="content">
+	<h1 class="headline">UserLogin</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/UserLogin.class.php</em></div>
+	
+	<p>The UserLogin class works with a User model and a UserLogin model to log a user in and out via cookie or form submission. Phork/it comes with pre-built models (<a href="https://github.com/phork/phorkit/blob/master/models/UserModel.class.php" rel="external">UserModel</a> and <a href="https://github.com/phork/phorkit/blob/master/models/UserLoginModel.class.php" rel="external">UserLoginModel</a>) but the basic Phork package leaves them up to you to implement. Phork/it also comes with access hooks which automatically integrate the UserLogin utility into the site.</p>
+	<p>The idea behind the UserLogin model is that each record contains a user ID and a public and private key. The public key can be generated randomly and is stored in a cookie along with the user ID. The private key is built from a string unique to the user but that doens't change (eg. their browser information or user agent). A user can have several user login records (eg. one per browser if the browser data was used to generated the private key) but it's recommended that you set a maximum threshold and flush any older records.</p>
+	<p>When a user is logged in via cookie a call is made to load a user login record from the database by the user ID and public key from the cookie. The private key in the database is then compared to a newly generated private key and if they match then the cookie is considered valid and the user is logged in.</p>
+	
+	<br />
+	
+	<h2>Example Private Key</h2>
+	<?php print Markup::formatCode('
+		//fall back to the user agent when no browscap available; if the user updates their browser they may be logged out
+		public function getPrivateKey($intUserId) {
+		    if (@ini_get(\'browscap\')) {
+		        $objBrowser = get_browser();
+		        $strIdentity = $objBrowser->platform . $objBrowser->parent;
+		    } else {
+		        $strIdentity = $_SERVER[\'HTTP_USER_AGENT\'];
+		    }
+		    return md5($intUserId . $strIdentity . AppConfig::get(\'HashKey\'));
+		}
+	'); ?>
+	
+	
+	<h2>Example Public Key</h2>
+	<?php print Markup::formatCode('
+		$strPublicKey = md5(rand() . microtime());
+	'); ?>
+	
+	
+	<h2>Example Flush (from UserLoginModel)</h2>
+	<?php print Markup::formatCode('
+		public function flushExpired() {
+		    if ($intUserId = $this->current()->get(\'userid\')) {
+		        if ($intMaxConcurrentLogins = AppConfig::get(\'MaxConcurrentLogins\', false)) {
+		            $objUserLogin = clone $this;
+		            
+		            //load in order of last accessed date with the more recently used records first
+		            if ($objUserLogin->loadByUserId($intUserId) && $objUserLogin->count() > $intMaxConcurrentLogins) {
+		                $objUserLogin->seek($intMaxConcurrentLogins);
+		                while (list(, $objRecord) = $objUserLogin->each()) {
+		                    $arrDeleteIds[] = $objRecord->get(self::ID_PROPERTY);
+		                }
+		                
+		                if (!empty($arrDeleteIds)) {
+		                    $objUserLogin->deleteById($arrDeleteIds);
+		                }
+		            }
+		            unset($objUserLogin);
+		        }
+		    }
+		}
+	'); ?>
+</div>

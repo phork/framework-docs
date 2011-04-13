@@ -1,0 +1,21 @@
+* html #shell {
+	height: 100%;
+}
+
+.clear {
+	overflow: hidden;
+	zoom: 1;
+	word-wrap: break-word;
+}
+
+.cleared {
+	zoom: 1;
+}
+
+#header .constrained {
+	z-index: 1000;
+}
+
+#header-logo {
+	z-index: 900;
+}

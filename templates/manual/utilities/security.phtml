@@ -1,0 +1,15 @@
+<div id="content">
+	<h1 class="headline">Security</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Security.class.php</em></div>
+	
+	<p>The security class is used to encrypt and decrypt strings. Currently it just uses a simple substitution cipher based on the $arrConfig['EncryptInput'] and $arrConfig['EncryptOutput'] subsitution configuration in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#global">global configuration</a> file. In the future this will be swapped out for real encryption.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		$strOriginal = \'foobar\';
+		$strEncrypted = Security::encrypt($strOriginal);
+		$strDecrypyed = Security::decrypt($strEncrypted);
+	'); ?>
+</div>

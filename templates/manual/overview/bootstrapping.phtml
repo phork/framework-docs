@@ -1,0 +1,11 @@
+<div id="content">
+	<h1 class="headline">Bootstrapping</h1>
+	
+	<p>The bootstrap does most of the heavy lifting before delegating the page-specific functionality to a <a href="<?php echo($strBaseUrl); ?>/manual/overview/controllers/">controller</a>. It also includes all the core files needed by Phork. It's instantiated and run from the front controller (index.php).</p>
+	<p>The bootstrap's constructor sets up the include paths for the site components, loads the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/">configuration</a> files, loads the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreLanguage/">language</a> translations if applicable, and then loads any other global libraries such as the <a href="<?php echo($strBaseUrl); ?>/manual/database/DatabaseFactory/">database</a> and the <a href="<?php echo($strBaseUrl); ?>/manual/cache/CacheFactory/">cache</a> objects. Then it sets up the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreError/">error handler</a> and the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDebug/">debugger</a>, <a href="<?php echo($strBaseUrl); ?>/manual/overview/routing/">parses the URL</a>, and starts the session if applicable.</p>
+	<p>When the bootstrap is <strong>run()</strong> it runs any <a href="<?php echo($strBaseUrl); ?>/manual/overview/hooks/">hooks</a> that have been registered, determines which controller to use and initializes and runs that controller.</p>
+	
+		
+	<h2>Extending the Bootstrap</h2>
+	<p>The default bootstrap is <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreBootstrap/">CoreBootstrap</a>. Any changes that you need to the boostrap should be done in AppBootstrap or a site-specific extension of CoreBootstrap such as <em>phork/sites/[sitetype]/bootstraps/SiteBootstrap.class.php</em>.</p>
+</div>

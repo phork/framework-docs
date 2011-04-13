@@ -1,0 +1,65 @@
+<div id="content">
+	<h1 class="headline">CoreLanguage</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreLanguage.class.php</em> and <em>phork/php/app/AppLanguage.class.php</em></div>
+	
+	<p>The CoreLanguage class is used to translate alerts and messages into different languages. The language to use is defined in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#global">global configuration</a> as $arrConfig['Language'] and set up in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>. If no language is defined (which is the default) then nothing is translated.</p>
+	<p>The global translation files are in <em>phork/lang/[language]/</em>, however each site can also have their own translation files in <em>phork/sites/[sitetype]/lang/[language]/</em>. Site-specific translations override global translations.</p>
+	<p>Any file in the language directories named with a <em>.lang</em> extension will be loaded into the translator. The core Phork translations are in <em>phork/lang/[language]/phork.lang</em> which shouldn't be edited. Currently the only translation is English which can be used as a template for other language replacements.</p>
+	<p>It's possible to reset the language at any point of the application by re-calling the <strong>setLanguage()</strong> method. Any translations done before resetting the language won't be changed to the new language.</p>
+	<p>The language class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<h2>Caching</h2>
+	<p>Language translations can be cached so they don't need to be parsed from files for each page load. The location of the language file cache can be defined in <em>global.config.php</em>. Cache files should be in array format with the array key being the string to translate and the value being the translation.</p>
+	<?php print Markup::formatCode('
+		$arrConfig[\'LangCache\'] = AppConfig::get(\'FilesDir\') . \'app/lang\';
+	'); ?>
+	
+	<br />
+	
+	<h2>Example Translation</h2>
+	<?php print Markup::formatCode('
+		//standard translation
+		$strTranslation = AppLanguage::translate(\'Permission denied\');
+		
+		//translation with variables
+		$strTranslation = AppLanguage::translate(\'Error: %s in %s on line %d\', \'Permission denied\', \'foo.php\', 42);
+	'); ?>
+	
+	
+	<h2>Example Initialization (from the bootstrap)</h2>
+	<?php print Markup::formatCode('
+		if ($strLanguage = AppConfig::get(\'Language\', false)) {
+		    $arrFilePaths = array();
+		    if ($strInstallDir = AppConfig::get(\'InstallDir\')) {
+		        $arrFilePaths[] = "{$strInstallDir}/lang/";
+		    }
+		    if ($strLangDir = AppConfig::get(\'LangDir\')) {
+		        $arrFilePaths[] = $strLangDir;
+		    }
+		
+		    $objLanguage = AppLanguage::getInstance();
+		    $objLanguage->setFilePath($arrFilePaths);
+		    $objLanguage->setCachePath(AppConfig::get(\'LangCache\', false));
+		    $objLanguage->setLanguage($strLanguage);
+		}
+	'); ?>
+	
+	
+	<h2>Example *.lang File</h2>
+	<?php print Markup::formatCode('
+		default: Permission denied
+		replace: Permission denied, dude
+
+		default: Error: %s in %s on line %d
+		replace: Error: %s in %s on line %d, dude
+	'); ?>
+	
+	
+	<h2>Example Cache File</h2>
+	<?php print Markup::formatCode('
+		return array(
+		    \'Permission denied\' => \'Permission denied, dude\',
+		    \'Error: %s in %s on line %d\' => \'Error: %s in %s on line %d, dude\'
+		);
+	'); ?>
+</div>

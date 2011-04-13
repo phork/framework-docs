@@ -1,0 +1,32 @@
+<div id="content">
+	<h1 class="headline">Hooks</h1>
+
+	<p>Hooks are a way to tie into the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a> when it's run. Phork comes with <a href="<?php echo($strBaseUrl); ?>/manual/hooks/CommonHooks/">CommonHooks</a> and <a href="<?php echo($strBaseUrl); ?>/manual/hooks/CacheHooks/">CacheHooks</a>, Phork/it comes with AccessHooks, and additional hooks can be added to each site in the <em>phork/sites/[sitetype]/hooks/</em> directory. They're run using the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreEvent/">CoreEvent</a> class, and they can be called at the following points:</p>
+	<ul>
+		<li>Pre run - This hook point is before the controller is determined.</li>
+		<li>Pre initialize - This hook point is before the controller is initialized.</li>
+		<li>Post initialize - This hook point is after the controller is initialized.</li>
+		<li>Post run - This hook point is after the controller has been run.</li>
+	</ul>
+	
+	<p>Hooks should be registered in the site's bootstrap file at <em>phork/sites/[sitetype]/bootstraps/SiteBootstrap.class.php</em> and should be passed the same parameters as <a href="http://us.php.net/call_user_func_array" rel="external">call_user_func_array()</a>, which is a callback function, and (optionally) the array of arguments to pass to the callback function.</p>
+	
+	<br />
+	
+	<h2>Example (from the bootstrap)</h2>
+	<?php print Markup::formatCode('
+		//add the hook to always verify the form post and to track page history
+		if (AppLoader::includeHooks(\'CommonHooks\')) {
+		    $objCommonHooks = new CommonHooks();
+		    $this->registerPreRunHook(array($objCommonHooks, \'verifyToken\'));
+		    $this->registerPostRunHook(array($objCommonHooks, \'trackHistory\'), array(5, array(\'css\', \'js\', \'xml\', \'json\')));
+		}
+		    
+		//add the hooks to handle full page caching			
+		if (AppLoader::includeHooks(\'CacheHooks\')) {
+		    $objCacheHooks = new CacheHooks();
+		    $this->registerPreRunHook(array($objCacheHooks, \'serveCache\'));
+		    $this->registerPostRunHook(array($objCacheHooks, \'saveCache\'));
+		}
+	'); ?>
+</div>

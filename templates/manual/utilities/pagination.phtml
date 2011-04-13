@@ -1,0 +1,71 @@
+<div id="content">
+	<h1 class="headline">Pagination</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Pagination.class.php</em></div>
+	
+	<p>The Pagination class calculates all the numbers necessary to build out pagination. It doesn't actually build out anything, but the numbers are available for a template to take advantage of.</p>
+	
+	<br />
+	
+	<h2>Basic Example</h2>
+	<?php print Markup::formatCode('
+		$intCurrentPage = 10;
+		$intTotalItems = 100;
+		$intItemsPerPage = 5;
+		$intNumLinks = 4;
+		
+		$objPagination = new Pagination($intCurrentPage, $intTotalItems, $intItemsPerPage, $intNumLinks);
+		
+		$intStartItem = $objPagination->getStartItem();
+		$intEndItem = $objPagination->getEndItem();
+		
+		$intStartPage = $objPagination->getStartPage();
+		$intEndPage = $objPagination->getEndPage();
+		$intTotalPages = $objPagination->getTotalPages();
+	'); ?>
+	
+	
+	<h2>Output Example</h2>
+	<?php print Markup::formatCode('
+		<?php if ($intStartPage != $intEndPage) { ?>
+		<div class="pagination">
+		    Items <?php echo($intStartItem); ?> to <?php echo($intEndItem); ?>
+		    <ul>
+		        <?php if ($intCurrentPage != 1) { ?>
+		            <li><a href="<?php echo($strUrl); ?>/page=<?php echo($intCurrentPage - 1); ?>/">Prev</a></li>
+		        <?php } ?>
+		        
+		        <?php if ($intStartPage != 1) { ?>
+		            <li><a href="<?php echo($strUrl); ?>/page=1/">1</a></li>
+		            
+		            <?php if ($intStartPage != 2) { ?>
+		            <li class="divider">...</li>
+		            <?php } ?>
+		        <?php } ?>
+		        
+		        <?php for ($i = $intStartPage; $i <= $intEndPage; $i++) { ?>
+		            <li><a href="<?php echo($strUrl); ?>/page=<?php echo($i); ?>/"><?php echo($i); ?></a></li>
+		        <?php } ?>
+		        
+		        <?php if ($intEndPage != $intTotalPages) { ?>
+		            <?php if ($intEndPage != $intTotalPages - 1) { ?>
+		            <li class="divider">...</li>
+		            <?php } ?>
+		            
+		            <li><a href="<?php echo($strUrl); ?>/page=<?php echo($intTotalPages); ?>/"><?php echo($intTotalPages); ?></a></li>
+		        <?php } ?>
+		        
+		        <?php if ($intCurrentPage != $intTotalPages) { ?>
+		            <li><a href="<?php echo($strUrl); ?>/page=<?php echo($intCurrentPage + 1); ?>/">Next</a></li>
+		        <?php } ?>
+		    </ul>
+		</div>
+		<?php } ?>
+	'); ?>
+	
+	
+	<h2>Output Result</h2>
+	<?php print Markup::formatCode('
+		Items 46 to 50
+		Prev 1 ... 8 9 10 11 ... 20 Next
+	'); ?>
+</div>

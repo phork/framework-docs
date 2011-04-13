@@ -1,0 +1,13 @@
+<div id="content">
+	<h1 class="headline">CacheAdaptor</h1> 
+	<div id="filepath">Filepath: <em>phork/php/cache/CacheAdaptor.class.php</em></div>
+		
+	<p>The CacheAdaptor class is an abstract class that all caching classes should extend. It implements the Cache interface found at <em>phork/php/cache/interfaces/Cache.interface.php</em>.
+	<p>In addition to being a straight forward adaptor, each adaptor class has the ability to cache to different tiers. The default tiers are base and presentation.</p>
+	<ul>
+		<li>The <strong>base</strong> tier is generally used for caching raw data (arrays, objects, etc.) like that from a model.</li>
+		<li>The <strong>presentation</strong> tier is generally used for caching output (HTML, XML, JSON, etc).</li>
+	</ul>
+	<p>This comes in handy when a site's templates have changed and need to be flushed without flushing any underlying data. In that case the presentation tier can be flushed and the basr tier can be left alone.</p>
+	<p>All the cache tiers are defined in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#cache">cache configuration</a>.</p>
+</div>

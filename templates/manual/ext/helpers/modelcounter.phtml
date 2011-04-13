@@ -1,0 +1,44 @@
+<div id="content">
+	<h1 class="headline">ModelCounter</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/helpers/ModelCounter.class.php</em></div>
+	
+	<p>The ModelCounter class is a model helper that handles updating a record count in a different model. For example if you have a blog model and a comment model and anytime a comment has been added to a blog, the blog model should have a counter updated. This registers events that are run by the model object. Any data returned from the event methods is available in the function that runs the helper event.</p>  
+	<p>This has an additional feature allowing the count update to be written to the cache and only made permanent in the database after every x updates where x is defined by the UpdateFrequency config var. The system does this by checking the modulus of the updated count and the UpdateFrequency config var.  There is also a SyncFrequency config var that does a full count and update. This checks if rand(1, 100) is less than or equal to the sync frequency and if  so the count is synced. A sync frequency of 0 means never sync, and 100 means always sync.</p>  
+	<p>In the case of this helper it's a good idea to append the helper from the model object's init method.</p>  
+	<p>The following code block should go in the CommentModel's init method. The IdProperty is the comment property that is tied to the primary key of the blogs. The CountProperty is the blog property that holds the comment count.</p>
+	
+	<?php print Markup::formatCode('
+		if (AppLoader::includeExtension(\'helpers/\', \'ModelCounter\')) {
+		    $this->appendHelper(\'counter\', \'ModelCounter\', array(
+		        \'IdProperty\'        => \'blogid\',
+		        \'CountProperty\'     => \'comments\',
+		        \'ClassName\'         => \'BlogModel\',
+		        \'UpdateMethod\'      => \'updateCommentCount\',
+		        \'SyncMethod\'        => \'syncCommentCount\',
+		        \'UseCache\'          => true,
+		        \'CacheKey\'          => \'comments:count:%d\',
+		        \'UpdateFrequency\'   => 5,
+		        \'SyncFrequency\'     => 1
+		    ));
+		    $this->initHelper(\'counter\', array(\'incrementCount\', \'decrementCount\'));
+		}
+	'); ?>
+	 
+	<p>This code block would go in the BlogModel to update the database by incrementing the existing comment count by the $intAlterBy, preferably using a query with the syntax set comment = comment + 1.</p>
+	 
+	<?php print Markup::formatCode('
+		public function updateCommentCount($intAlterBy) {
+	 	    ...
+	 	    return $blnSuccess;
+		}
+	'); ?>
+	 
+	<p>This code block would go in the BlogModel to sync the count. If $blnUpdateRecord is set then it would load the synced count back into the record object.</p>
+	 
+	<?php print Markup::formatCode('
+		public function syncCommentCount($blnUpdateRecord = false) {
+		    ...
+		    return $blnSuccess
+		}
+	'); ?>
+</div>

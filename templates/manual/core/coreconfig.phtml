@@ -1,0 +1,33 @@
+<div id="content">
+	<h1 class="headline">CoreConfig</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreConfig.class.php</em> and <em>phork/php/app/AppConfig.class.php</em></div>
+	
+	<p>The CoreConfig class is used to store and retrieve configuration variables rather than having globals or constants scattered around. It's first used in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a> to load the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#global">global configuration</a> and either the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#site">site configuration</a> or the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#script">script configuration</a>.</p>
+	<p>There are two ways to set variables in the config object; the first way is to load a config file, and the second is to explicitly set one variable at a time.</p>
+	<p>Generally the config variables will be stored in the global namespace within the config object, but it's possible to store them in a custom namespace as well.<p>
+	<p>The config class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		//load the global config file
+		$arrGlobalConfig = AppConfig::load(\'global\');
+		
+		//explicitly set some config vars in the global namespace
+		AppConfig::set(\'MyConfigNumber\', 42);
+		AppConfig::set(\'MyConfigString\', \'foo\');
+		
+		//explicitly set some config vars in the test namespace
+		AppConfig::set(\'MyConfigNumber\', 213, \'test\');
+		AppConfig::set(\'MyConfigString\', \'bar\', \'test\');
+		
+		//print some global config values
+		print AppConfig::get(\'MyConfigNumber\');	//42
+		print AppConfig::get(\'MyConfigString\'); //foo
+		
+		//print some test config values
+		print AppConfig::get(\'MyConfigNumber\', \'test\'); //213
+		print AppConfig::get(\'MyConfigString\', \'test\'); //bar
+	'); ?>
+</div>

@@ -1,0 +1,46 @@
+<div id="content">
+	<h1 class="headline">LocalFileSystem</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/files/LocalFileSystem.class.php</em></div>
+	
+	<p>The LocalFileSystem class is used for all file system operations. It wraps the standard <a href="http://us.php.net/filesystem" rel="external">PHP filesystem functions</a> with error handling and allows for the filesystem functions to be extended in a standardized way.</p>
+	<p>The following operations are supported</p>
+	
+	<ul>
+		<li>Check if a directory exists and is a directory</li>
+		<li>Create a directory</li>
+		<li>Move a directory</li>
+		<li>Delete a directory</li>
+		<li>Change directory permissions</li>
+		<li>List the contents of a directory</li>
+		
+		<li>Check if a file exists and is a file</li>
+		<li>Open a file and return the contents</li>
+		<li>Create a file</li>
+		<li>Create a temp file</li>
+		<li>Append a file</li>
+		<li>Copy a file</li>
+		<li>Move a file</li>
+		<li>Delete a file</li>
+		<li>Change the file permissions</li>
+		
+		<li>Check if a file or directory exists</li>
+		<li>Return the temp directory path</li>
+		<li>Create a hashed directory</li>
+	</ul>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		if (!($objFileSystem = AppRegistry::get(\'FileSystem\', false))) {
+		    if (AppLoader::includeExtension(\'files/\', $strFileSystem = AppConfig::get(\'FileSystem\') . \'FileSystem\')) {
+		        $objFileSystem = new $strFileSystem();
+		        AppRegistry::register(\'FileSystem\', $objFileSystem);
+		    }
+		}
+		
+		if (!$objFileSystem->isDirectory(\'/foo/bar\')) {
+		    $blnResult = $objFileSystem->createDirectory(\'/foo/bar\', 0755, true);
+		}
+	'); ?>
+</div>

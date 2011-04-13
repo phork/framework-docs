@@ -1,0 +1,75 @@
+<div id="content">
+	<h1 class="headline">Display</h1>
+	
+	<p>Phork comes with a <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDisplay/">CoreDisplay</a> class used to pull together the various parts of a page. The <a href="<?php echo($strBaseUrl); ?>/manual/overview/controllers/">controller</a> is generally the only code that should add output to the display class.</p>
+	<p>The display class handles <a href="http://us.php.net/manual/en/book.outcontrol.php" rel="external">output buffering</a> which allows content to be rearranged and replaced after it has been added to the display object. If output buffering has been turned on then the page will output when the <strong>output()</strong> method is called manually or the display object has been destroyed and the <a href="http://us.php.net/__destruct#language.oop5.decon.destructor" rel="external">__destruct()</a> method has been called. If output buffering is off then the content is output as soon as it's added to the display object.</p>
+	<p>The display class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	
+	<h2>Headers</h2>
+	<p>Custom headers such as location redirects can also be added with <strong>appendHeader()</strong>. In order for a header to be sent it must be appended before any output has been displayed.</p>
+	<?php print Markup::formatCode('
+		AppDisplay::getInstance()->appendHeader(\'location: /\');
+	'); ?>
+	
+	
+	<h2>Status Codes</h2>
+	<p>Custom HTTP status codes (eg. 404 page not found) can be set with <strong>setStatusCode()</strong>.
+	<?php print Markup::formatCode('
+		AppDisplay::getInstance()->setStatusCode(404);
+	'); ?>
+	
+	
+	<h2>Display Nodes</h2>
+	<p>The display class works with nodes. A page can be made up of one or more nodes. For example, you might want a header node, a content node, and a footer node. Or you may just want a single node that includes the header and footer content in it.</p>
+	<p>If you have multiple nodes with output buffering turned on then you can rearrange the nodes. This is helpful when, for example, you need to display all errors at the top of the page, even if an error was generated somewhere in the middle of the page. In that case you would append the error node last, and use <strong>setNodeOrder()</strong> to output it in the right place.</p>
+	
+	
+	<h2>Node Types</h2>
+	<p>A node can be added in one of two ways. It can be a <a href="<?php echo($strBaseUrl); ?>/manual/overview/templates/">template</a> that's included with <strong>appendTemplate()</strong>, or it can be a string that's included with <strong>appendString()</strong>.</p>
+	
+	
+	<h2>Variables in Templates</h2>
+	<p>If there are any variables needed within the template, a second argument can be passed to <strong>appendTemplate()</strong> with an array of variables to be extracted for use within the template. The key of the array items will be used as the variable name when the data has been extracted.</p>
+	
+	
+	<h2>Compression</h2>
+	<p>If the zlib extension is available, the display class can turn on compression using <strong>setCompress()</strong>.</p>
+	
+	
+	<h2>Extending the Display</h2>
+	<p>The default class is AppDisplay which is an empty extension of <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDisplay/">CoreDisplay</a>. Any changes that you need to the display should be done in AppDisplay.</p>
+	
+	<br />
+
+	<h2>Node Example (from within a controller)</h2>
+	<?php print Markup::formatCode('
+		AppDisplay::getInstance()->appendTemplate(\'header\', $this->getTemplatePath(\'common/header\'));
+		AppDisplay::getInstance()->appendTemplate(\'content\', $this->getTemplatePath(\'index\'), array(
+		    \'strFoo\' => $strFoo,
+		    \'intBar\' => $intBar
+		));
+		AppDisplay::getInstance()->appendTemplate(\'footer\', $this->getTemplatePath(\'common/footer\'));
+	'); ?>
+	
+	
+	<h2>404 Page Example (from within a controller)</h2>
+	<?php print Markup::formatCode('
+		AppDisplay::getInstance()->setStatusCode(404);
+		AppDisplay::getInstance()->appendTemplate(\'error\', $this->getTemplatePath(\'system/404\'));
+	'); ?>
+	
+	
+	<h2>String Example (from within a controller)</h2>
+	<?php print Markup::formatCode('
+		AppDisplay::getInstance()->appendString(\'content\', \'This will be output on the page!\');
+	'); ?>
+	
+	
+	<h2>Code Replacement Example</h2>
+	<?php print Markup::formatCode('
+		//replace the load time placeholder in the built page
+		$objDisplay = AppDisplay::getInstance();
+		$objDisplay->replace(\'&lt;[LOAD TIME]&gt;\', $strLoadTime);
+	'); ?>
+</div>

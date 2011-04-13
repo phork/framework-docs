@@ -1,0 +1,193 @@
+<div id="content">
+	<h1 class="headline">Phork Installation</h1>
+	
+	<p>The default Phork installation comes with 2 basic sites to use as a starting point for your application - <strong>standard</strong> and <strong>lite</strong>, or you can download the <a href="<?php echo(AppConfig::get('PhorkitUrl')); ?>" rel="external">Phork/it package</a>. It's recommended that you choose one of these sites and make a recursive copy of its site directory which can be found at <em>phork/sites/[sitetype]/</em>. You can name your directory copy anything that you'd like, for example <em>public</em>, <em>admin</em>, <em>phorkit</em>, <em>myproject</em>, etc. You can even have multiple sites all built off the same Phork core. For example you may want both a public site and an admin site, or even several completely unrelated sites.</p>
+	<ul id="sitetype">
+		<li>The <a href="<?php echo(AppConfig::get('StandardUrl')); ?>"><strong>standard</strong></a> site uses the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreController/">CoreController</a> class. It features automatic URL <a href="<?php echo($strBaseUrl); ?>/manual/overview/routing/">routing</a>, cacheable nodes, basic header and footer templates, and automatically displayed errors and alerts. The standard site also has hooks for page caching and history tracking, as well as a load timer. The hooks and the load timer can easily be removed.</li>
+		<li>The <a href="<?php echo(AppConfig::get('LiteUrl')); ?>"><strong>lite</strong></a> site uses the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreControllerLite/">CoreControllerLite</a> class. It features automatic URL <a href="<?php echo($strBaseUrl); ?>/manual/overview/routing/">routing</a>, but currently does nothing more than display an index page. The lite site is capable of incorporating the standard site's hooks and load timer as well, however they are not there by default.</li>
+		<li>And <a href="<?php echo($strPhorkitUrl); ?>" rel="external"><strong>Phork/it</strong></a> is a pre-built starter kit based on the standard site architecture. To learn more about Phork/it check out the <a href="<?php echo($strPhorkitUrl); ?>" rel="external">Phork/it demo</a>.</li>
+	</ul>
+	
+	<p>If you would like a lite site with the aforementioned hooks or conversely, a standard site without them they can be added to or removed from <em>phork/sites/[sitetype]/bootstraps/SiteBootstrap.class.php</em>. The site timer can be added to or removed from the <a href="#front">front controller</a></p>
+	<p><strong>The document root for each site is <em>phork/sites/[sitetype]/htdocs/</em></strong> where [sitetype] is <em>public</em>, <em>admin</em>, <em>phorkit</em>, <em>myproject</em> or any other site you've created.</p>
+	
+	
+	<h2 id="front">Front Controller (index.php)</h2>
+	<p>Each site contains a front controller at <em>phork/sites/[sitetype]/htdocs/index.php</em>. Your Phork application should be routed through this file. You may need to make some changes to this file.</p>
+	<p>First you may want to change the <a href="http://us.php.net/error_reporting" rel="external">error_reporting()</a> level. You must leave E_USER_NOTICE errors on because Phork relies heavily on <a href="http://us.php.net/trigger_error" rel="external">trigger_error()</a>.</p>
+	
+	<?php print Markup::formatCode('
+		error_reporting(E_ALL | E_STRICT);
+	'); ?>
+	
+	<p>Next you may need to change the following directory variables: $strSiteDir, $strConfigDir, $strInstallDir. By default these are determined from the location of index.php. If you've moved any directories to <a href="#nonstandard">non-standard locations</a> these values will need changing accordingly. Likewise, the bootstrap include may need a new path. All the directory paths should be absolute paths that end with a slash.</p>
+	<?php print Markup::formatCode('
+		//the path to the directory containing the site files (eg. /path/to/phork/sites/lite/)
+		if (empty($strSiteDir)) {
+		    $strSiteDir = dirname(dirname(__FILE__)) . \'/\';
+		}
+		
+		//the path to the directory containing the site config files (eg. /path/to/phork/sites/lite/config/live/)
+		if (empty($strConfigDir)) {
+		    if (empty($strConfigType)) {
+		        $strConfigType = \'live\';
+		    }
+		    $strConfigDir = "{$strSiteDir}config/{$strConfigType}/";
+		}
+		
+		//the path to the directory containing the phork package (eg. /path/to/phork/)
+		if (empty($strInstallDir)) {
+		    $strInstallDir = dirname(dirname($strSiteDir)) . \'/\';
+		}
+	'); ?>
+	
+	<p>There are 2 ways to change these values. The first is to edit the front controller and replace the auto-detection with hardcoded values. The second (and recommended) way is to create an <a href="http://us.php.net/ini.core#ini.auto-prepend-file" rel="external">auto-prepend file</a> with the directory definitions in it. Typically this file is named <em>paths.php</em> and goes in the same directory as the front controller. If you can't automatically prepend the paths file then you can put an include at the top of the front controller.</p>
+	<p>An example prepended <em>paths.php</em> file could look something like this:</p>
+	
+	<?php print Markup::formatCode('
+		<?php    
+		    //determine the config file directory based on the host name
+		    if (strpos($_SERVER[\'HTTP_HOST\'], \'dev\') !== false) {
+		        $strConfigType = \'dev\';
+		    } else if (strpos($_SERVER[\'HTTP_HOST\'], \'stage\') !== false) { 
+		        $strConfigType = \'stage\';
+		    } else {
+		        $strConfigType = \'live\';
+		    }
+		    
+		    //use the global phork package
+		    $strInstallDir = \'/www/phork/\';
+		?>
+	'); ?>
+	
+	
+	<h2 id="configuration">Configuration</h2>
+	<p>Phork comes with a directory of example <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/">configuration</a> files. Each site type (eg. dev, stage, live) should have its own set of configuration files. The configuration directories can be found at <em>phork/sites/[sitetype]/config/</em>.</p>
+	<p>By default the config directory is set to <em>live</em>. If your preferred configuration is different from the default then you will need to edit how $strConfigType is determined. Again, this can be set in either the front controller or an auto-prepend file. Usually the config type is determined by the host name.</p>
+	
+	<?php print Markup::formatCode('
+		//determine the config file directory based on the host name
+		if (strpos($_SERVER[\'HTTP_HOST\'], \'dev\') !== false) {
+		    $strConfigType = \'dev\';
+		} else {
+		    $strConfigType = \'live\';
+		}
+	'); ?>
+	
+	<p>Next you should copy all the files from the <em>phork/sites/[sitetype]/config/example/</em> directory to your configuration directory. If, for example, $strConfigType is set to <em>live</em> then your config directory will be <em>phork/sites/[sitetype]/config/live/</em>.</p>
+	<p>You should go through the configuration files and set them up for your particular application.</p>
+	
+	
+	<h2 id="htaccess">Mod Rewrite and .htaccess</h2>
+	<p>Each site's document root has an <a href="http://en.wikipedia.org/wiki/Htaccess" rel="external">.htaccess</a> file in it that turns on <a href="http://httpd.apache.org/docs/2.0/misc/rewriteguide.html" rel="external">Apache's Mod Rewrite</a> for cleaner URLs like <em>http://www.example.org/path/to/page</em>. If you're not using Apache you should read your server's documentation on URL rewriting. If URL rewriting is unavailable then Phork will rely on $_SERVER['PATH_INFO']. In that case your URLs will look like <em>http://www.example.org/index.php/path/to/page</em> or <em>http://www.example.org/index/path/to/page</em>.</p>
+	<p>The preferred rewrite rule does not use a query string, however if your server doesn't allow this then it's possible to use a query by making some small adjustments to how <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreUrl/">CoreUrl</a> is called.
+	
+	<?php print Markup::formatCode('
+		RewriteEngine on
+		
+		RewriteRule	^(robots\.txt|favicon\.ico)$ - [L]
+		
+		RewriteCond     %{REQUEST_FILENAME} !-d
+		RewriteCond     %{REQUEST_FILENAME} !-f
+		RewriteCond     %{REQUEST_FILENAME} !-l
+		
+		#This is the preferred rewrite rule
+		RewriteRule  .*  ./index.php/$0 [L,NC,QSA]
+		
+		#This is the alternative rewrite rule that uses the query string
+		#RewriteRule .*	./index.php?$0 [L,NC,QSA]
+	'); ?>
+	
+	<p>The default Phork installation comes with the assumption that you do not have mod rewrite. If you would like to set up your application to use mod rewrite then you should edit the <em>site.config.php</em> file and change the following line from this:</p>
+	
+	<?php print Markup::formatCode('
+		$arrConfig[\'BaseUrl\'] = \'/index.php\';
+	'); ?>
+	
+	<p>to this:</p>
+
+	<?php print Markup::formatCode('
+		$arrConfig[\'BaseUrl\'] = \'\';
+	'); ?>
+	
+	<p>If you would prefer your URL to be in the format <em>http://www.example.org/index/path/to/page</em> instead of <em>http://www.example.org/index.php/path/to/page</em> then you should change the aforementioned line to this:</p>
+	
+	<?php print Markup::formatCode('
+		$arrConfig[\'BaseUrl\'] = \'/index\';
+	'); ?>
+	
+	<p>Alternately if you'd prefer index to be replaced with something else entirely then please see the section on <a href="#renaming">renaming index.php</a>.</p>	
+	<p>When linking to different pages throughout your application if you prepend each link with the base URL then you can easily switch between using mod rewrite and not using it.</p>
+	
+	<?php print Markup::formatCode('
+		//this assumes that $arrConfig[\'BaseUrl\'] has been passed into this template as $strBaseUrl
+		<a href="<?php echo($strBaseUrl); ?>/foo/bar/">Foo Bar</a>
+	'); ?>
+	
+	
+	<h2 id="multisite">Document Roots</h2>
+	<p>If you only have one site per Phork installation you can ignore the subdomain and subdirectory installation sections and just set up your server's document root to be your site's htdocs directory. The standard document root for each site is <em>phork/sites/[sitetype]/htdocs/</em>.</p>
+	<p>If you have multiple sites running off the same Phork installation, this can be done in two different ways. The first and recommended way puts the each site type as a <a href="#subdomain">domain or subdomain</a>. For example, <em>http://admin.example.org</em>. The second way designates one site as the main site (eg. public) and puts the other sites as <a href="#subdirectory">subdirectories</a>. For example, <em>http://www.example.org/admin/</em>.</p>
+	
+
+	<h2 id="nonstandard">Non-Standard Document Roots</h2>
+	<p>If your document root can't be changed to <em>phork/sites/[sitetype]/htdocs/</em> then you can either move the full site directory to another location, or you can move just the contents of the site's htdocs directory. The rest of the directory structure should remain in tact however. If you do move things around you will need to edit the directory variables in the <a href="#front">front controller</a>. The following <em>site.config.php</em> snippet can be used for a Phork that's not at the document root.</p>
+	
+	<?php print Markup::formatCode('
+		//the site urls should always contain the domain; the css and js urls can omit it
+		$arrConfig[\'SiteUrl\'] = \'http://example.org\';
+		$arrConfig[\'SecureUrl\'] = \'https://example.org\';
+		$arrConfig[\'CssUrl\'] = \'/phorkit/htdocs\';
+		$arrConfig[\'JsUrl\'] = \'/phorkit/htdocs\';
+		
+		//the url of the front controller excluding the filename if using mod rewrite
+		$arrConfig[\'BaseUrl\'] = \'/phorkit/htdocs\';	
+	'); ?>
+	
+	<p>If you're using Phork/it then you'll also have to change the image paths in the CSS files.</p>	
+	
+	
+	<h2 id="subdomain">Domain and Subdomain Installation</h2>
+	<p>Phork already comes set up for domain/subdomain installation, however your server must also be set up to handle this. Server set up is beyond the scope of this document, but your server manual should have detailed instructions. You will need to set up a virtual domain to point to each site's document root.</p>
+	
+
+	<h2 id="subdirectory">Subdirectory Installation</h2>
+	<p>For the purpose of this documentation we will pretend that you are creating an admin site off the public site, in which case you would have already created <em>phork/sites/admin/</em> and <em>phork/sites/public/</em>. And we will also assume that you are using the <em>live</em> config directory.</p>
+	<p>In order for the different sites to work within subdirectories you'll first need to create a <a href="http://en.wikipedia.org/wiki/Symbolic_link" rel="external">symbolic link</a> (also known as a symlink) in the main site's document root to the sub-sites' document roots. In this case there would be a symlink to <em>phork/sites/admin/htdocs/</em> from <em>phork/sites/public/htdocs/admin</em>.</p>
+	
+	<?php print Markup::formatCode('
+		$ cd /path/to/phork/sites/public/htdocs/
+		$ ln -s ../../admin/htdocs admin
+	'); ?>
+	
+	<p>If your server doesn't support symlinks then you should move the sub-site's htdocs directory into the parent site's htdocs directory and follow the <a href="#nonstandard">non-standard document root</a> instructions for the sub-site. In this case you will want to move <em>phork/sites/admin/htdocs/</em> to <em>phork/sites/public/htdocs/</em> and rename it to admin. The path to your admin front controller would be <em>phork/sites/public/htdocs/admin/index.php</em>.</p>
+	<p>You'll have to alter each sub-site's config file to point to the new root directory as well as the new asset paths. The <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#site">configuration</a> will be covered in more detail later on, but for now you should open up <em>phork/sites/admin/config/live/site.config.php</em>.</p>
+	<p>If you want the admin to live at http://www.example.org/admin/, go to the URLs section and change the following lines:</p>
+	
+	<?php print Markup::formatCode('
+		//the url of the front controller excluding the filename if using mod rewrite
+		$arrConfig[\'BaseUrl\'] = \'/index.php\';
+	'); ?>
+	
+	<p>to one of these:</p>
+	
+	<?php print Markup::formatCode('
+		//include the filename if you don\'t have mod-rewrite
+		$arrConfig[\'BaseUrl\'] = \'/admin/index.php\';
+		
+		//don\'t include the filename if you have mod-rewrite
+		$arrConfig[\'BaseUrl\'] = \'/admin\';
+	'); ?>
+	
+	<p>If you wanted your admin to live at a different URL, say for example <em>private</em> then your symlink should be to <em>phork/sites/admin/htdocs/</em> from <em>phork/sites/public/htdocs/private</em> and the above config lines should use private in place of admin.</p>
+	
+	
+	<h2 id="renaming">Renaming index.php</h2>
+	<p>If you need to rename index.php you'll need to either change the rewrite rule in <a href="#htaccess">.htaccess</a> if you're using mod rewrite, or you'll need to change the $arrConfig['BaseUrl') definition in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#site">site configuration</a> file to end with the new filename.</p>
+	
+	
+	<h2 id="permissions">Directory Permissions</h2>
+	<p>In general the <em>phork/sites/[sitetype]/files/</em> directory is where all web-writable and uploaded files go, and so that directory and all subdirectories should have the appropriate permissions.</p>
+	<p>There are 3 predefined subdirectories: <em>app</em>, <em>private</em> and <em>public</em>. The general idea is that <em>app</em> is used for application files such as error logs, debug logs and file caches; <em>private</em> is used for files that are private and need to be run through a script that verifies permissions before outputting the file; and <em>public</em> is for files than anyone can access, and it can be symlinked to from the sites' htdocs directory.</p>
+	<p>If you wish to use Phork's <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreError/">error logging</a> and <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDebug/">debug logging</a> the default files that need to be writable are defined in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#global">global configuration</a>. They are usually <em>phork/sites/[sitetype]/files/app/logs/error.[date].log</em> and <em>phork/sites/[sitetype]/files/app/logs/debug.[date].log</em>.</p>
+</div>

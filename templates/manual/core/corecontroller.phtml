@@ -1,0 +1,273 @@
+<div id="content">
+	<h1 class="headline">CoreController</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreController.class.php</em></div>
+	
+	<p>The CoreController class is an extension to <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreControllerLite/">CoreControllerLite</a> which builds a page out of several cacheable nodes.</p>	
+	<p>All the controllers must implement the Controller interface found at <em>phork/php/core/interfaces/Controller.interface.php</em>.</p>
+	
+	<h2>Nodes</h2>
+	<p>The default nodes that make up a complete page in this controller are <strong>header</strong>, <strong>errors</strong>, <strong>alerts</strong>, <strong>content</strong>, and <strong>footer</strong> in that order. They're defined in the protected $arrNodeOrder property. The content node is determined by the URL. For example if the URL is <em>http://www.example.org/foo/bar/</em> then the FooController class (which in this case extends CoreController) would have a <strong>displayBar()</strong> method. If nodes different than the default nodes are required then they can be overridden in FooController.</p>
+	<p>The content node is a special node that that's run first, and the error node is a special node that's run last. This allows the content node to dictate things like titles and breadcrumbs to be displayed in the header node, and any errors triggered in the others nodes to be displayed in the error node even though it's technically displayed before the content node. This is accomplished using the output buffering features of the <a href="<?php echo($strBaseUrl); ?>/manual/overview/display/">display</a> object.</p>
+	
+	
+	<h2>Caching</h2>
+	<p>In order to use the node cache, each display[Node]() method must have a call to <strong>includeNodeCache()</strong> at the top, and if includeNodeCache() returns false then the content should be built as usual. This is handled automatically by the <strong>displayNode()</strong> method, which is the easiest way to include a template.</p>
+	<p>The nodes to cache are defined in the <strong>$arrCacheUrls</strong> property in the controller. A <a href="http://us.php.net/preg_match" rel="external">regular expression</a> check is performed against the current URL and the list of URLs to cache. If a match is found then the data associated with the match is used to define the cache parameters which include the node(s) to cache, the namespace and the TTL (expiration time in seconds) of the cache.</p>
+	<p>If full page caching is required the <a href="<?php echo($strBaseUrl); ?>/manual/hooks/CacheHooks/">CacheHooks</a> hook is an alternative to node caching.</p>
+	
+	<br />
+	
+	<h2>Simple Display Example</h2>
+	<?php print Markup::formatCode('
+		//the display method called from http://www.example.org/foo/bar/
+		public function displayBar() {
+		    
+		    //the template path is relative to the template directory and excludes the .phtml extension
+		    $strTemplate = $this->getTemplatePath(\'path/to/template\');
+		   
+		    //display the template and pass in the variables that should be accessible within the template
+		    $this->displayNode(\'content\', $strTemplate, array(
+		        \'strTemplateString\'	=> \'foo\',
+		        \'intTemplateInteger\'	=> 42
+		    ));
+		}
+	'); ?>
+	
+	
+	<h2>Node Cache Example</h2>
+	<?php print Markup::formatCode('
+		//cache the content node of all the manual pages and /foo/bar/ for 300 seconds
+		protected $arrCacheUrls = array(
+		    \'#(/manual/[^/]+/[^/]+/)#\' => array(
+		        array(
+		            \'Node\'        => \'content\',
+		            \'Namespace\'   => null,
+		            \'Expire\'      => 300
+		        )
+		    ),
+		
+		    \'#(/foo/bar/)#\' => array(
+		        array(
+		            \'Node\'        => \'content\',
+		            \'Namespace\'   => null,
+		            \'Expire\'      => 300
+		        )
+		    )
+		);
+	'); ?>
+	
+	
+	<?php print Markup::formatCode('
+		//the display method called from http://www.example.org/foo/bar/
+		public function displayBar() {
+		    
+		    //the template path is relative to the template directory and excludes the .phtml extension
+		    $strTemplate = $this->getTemplatePath(\'path/to/template\');
+		    
+		    //register the event to load the page data on cache failure
+		    AppEvent::register(\'controller.displaynode\', array($this, \'loadBaz\'));
+		   
+		    //display the template; any variables needed for the display come from loadBaz()
+		    $this->displayNode(\'content\', $strTemplate);
+		}
+		
+		//the method called by the event object in displayNode() if the cache didn\'t load
+		public function loadBaz() {
+			
+		    //get some data from somewhere like a database or an API or an RSS feed
+		    $arrData = MyModel::loadAll();
+			
+		    //the variable $arrBazData will be available in the template
+		    return array(
+		        \'arrBazData\' => $arrData
+		    );
+		}
+	'); ?>
+	
+	
+	<h2>SiteController Example</h2>
+	
+	<?php print Markup::formatCode('
+		class SiteController extends CoreController {
+		    
+		    protected $strThemeDir;
+		    protected $strThemeCssDir;
+		    protected $strThemeJsDir;
+		    
+		    protected $arrNodeOrder = array(\'header\', \'nav\', \'errors\', \'alerts\', \'content\', \'footer\');
+		            
+		    
+		    /**
+		     * Sets up the common page variables to be used
+		     * across all node templates.
+		     * 
+		     * @access public
+		     */
+		    public function __construct() {
+		        AppConfig::get(\'NodeCacheEnabled\', false) || $this->setNoCache(true);
+		        parent::__construct();
+		        
+		        AppLoader::includeUtility(\'Form\');
+		        AppLoader::includeUtility(\'Date\');
+		        
+		        $this->assignPageVar(\'strBaseUrl\', AppConfig::get(\'BaseUrl\'));
+		        $this->assignPageVar(\'strSiteTitle\', AppConfig::get(\'SiteTitle\'));
+		        $this->assignPageVar(\'strTheme\', $strTheme = AppConfig::get(\'Theme\'));
+		        
+		        $this->strThemeDir = ($strTheme ? "themes/{$strTheme}/" : \'\');
+		        $this->strThemeCssDir = \'/css/\' . $this->strThemeDir;
+		        $this->strThemeJsDir = \'/js/\' . $this->strThemeDir;
+		    }
+		    
+		    
+		    /**
+		     * This is called from the bootstrap and it handles
+		     * any necessary processing before calling the display
+		     * method. Generally this sets up the type of content
+		     * to display based on the URL.
+		     *
+		     * @access public
+		     */
+		    public function run() {
+		        if (!($this->strContent = AppRegistry::get(\'Url\')->getSegment(1))) {
+		            $this->strContent = \'Index\';
+		        }
+		        $this->display();
+		    }
+		    
+		        
+		    /**
+		     * Returns the template path for the page templates.
+		     * If a theme has an overriding template that path is
+		     * returned, otherwise it returns the common path.
+		     *
+		     * @access protected
+		     * @param string $strTemplate The name of the template
+		     * @return string The path to the template
+		     */
+		    protected function getTemplatePath($strTemplate) {
+		        if ($this->strThemeDir && file_exists($strThemeTemplateDir = $this->strTemplateDir . $this->strThemeDir . $strTemplate . \'.phtml\')) {
+		            return $strThemeTemplateDir;
+		        } else {
+		            return $this->strTemplateDir . $strTemplate . \'.phtml\';
+		        }
+		    }
+		    
+		    
+		    /**
+		     * If a user is required to be logged in for a page
+		     * calling this will redirect them to the login page.
+		     *
+		     * @access protected
+		     */
+		    protected function requireLogin() {
+		        CoreAlert::alert(AppLanguage::translate(\'You must be logged in for that.\'), true);
+		        AppDisplay::getInstance()->appendHeader(\'location: \' . AppConfig::get(\'BaseUrl\') . \'/account/login/\');
+		        exit;
+		    }
+		    
+		    
+		    /*****************************************/
+		    /**     INCLUDE METHODS                 **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * Includes the pagination template.
+		     *
+		     * @access public
+		     * @param integer $intPage The current page number
+		     * @param integer $intPerPage The number of records per page
+		     * @param integer $intTotalItems The number of records to paginate
+		     * @param string $strLabel The type of record to display as "X [records]"
+		     * @param boolean $blnCollapse Whether to not show pagination if only one page
+		     */
+		    public function includePagination($intPage, $intPerPage, $intTotalItems, $strLabel = null, $blnCollapse = false) {
+		        AppLoader::includeUtility(\'SiteUrl\');
+		        $strPaginateUrl = SiteUrl::getPaginateUrlTemplate();
+		        
+		        AppLoader::includeUtility(\'Pagination\');
+		        $objPagination = new Pagination($intPage, $intTotalItems, $intPerPage);
+		        
+		        if (!$blnCollapse || !($objPagination->getTotalPages() == 1 && $objPagination->getCurrentPage() == 1)) {
+		            $this->includeTemplateFile($this->getTemplatePath(\'common/pagination\'), array(
+		                \'objPagination\'     => $objPagination,
+		                \'strPaginateUrl\'    => $strPaginateUrl,
+		                \'strLabel\'          => $strLabel
+		            ));
+		        }
+		    }
+		    
+		    
+		    /**
+		     * Includes a common template that doesn\'t warrant its
+		     * own specific include method.
+		     *
+		     * @access public
+		     * @param string $strFile The template file relative to the common dir
+		     * @param array $arrPageVars The variables to pass on to the template
+		     */
+		    public function includeCommon($strFile, $arrPageVars = array()) {
+		        $this->includeTemplateFile($this->getTemplatePath(\'common/\' . $strFile), $arrPageVars);
+		    }
+		    
+		    
+		    /*****************************************/
+		    /**     DISPLAY METHODS                 **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * Displays the navigation template.
+		     *
+		     * @access protected
+		     */
+		    protected function displayNav() {
+		        $this->displayNode(\'nav\', $this->getTemplatePath(\'common/nav\'));
+		    }
+		    
+		    
+		    /**
+		     * Displays the index page and passes it some vars.
+		     * about itself.
+		     *
+		     * @access protected
+		     */
+		    protected function displayIndex() {
+		        $this->displayNode(\'content\', $strTemplatePath = $this->getTemplatePath(\'index\'), array(
+		            \'strControllerPath\'   => __FILE__,
+		            \'strController\'       => __CLASS__,
+		            \'strDisplayMethod\'    => $this->strMethodPrefix . $this->strContent,
+		            \'strTemplatePath\'     => $strTemplatePath
+		        ));
+		    }
+		    
+		    
+		    /**
+		     * Permanently redirects the user to a new location
+		     * determined by the routed URL. The route should be
+		     * in the format /site/redirect/[controller]/[method]/status=301/
+		     * where method defaults to index if it\'s left out
+		     * and the status is optional.
+		     *
+		     * @access protected
+		     */
+		    protected function displayRedirect() {
+		        $objUrl = AppRegistry::get(\'Url\');
+		        if ($arrSegments = array_slice($objUrl->getSegments(), 2)) {
+		            $strLocation = implode(\'/\', $arrSegments) . \'/\';
+		        }
+		        
+		        if (isset($strLocation)) {
+		            $objDisplay = AppDisplay::getInstance();
+		            if ($objUrl->getFilter(\'status\') == 301) {
+		                $objDisplay->setStatusCode(301);
+		            }
+		            $objDisplay->appendHeader(\'location: \' . AppConfig::get(\'BaseUrl\') . \'/\' . $strLocation);
+		        } else {
+		            $this->error(404);
+		        }
+		    }
+		}
+	'); ?>
+</div>

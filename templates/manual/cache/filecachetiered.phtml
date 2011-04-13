@@ -1,0 +1,34 @@
+<div id="content">
+	<h1 class="headline">FilecacheTiered</h1>
+	<div id="filepath">Filepath: <em>phork/php/cache/filecache/FilecacheTiered.class.php</em></div>
+	
+	<p>The FilecacheTiered class is a caching adaptor that uses one of the FileSystem classes to write the cache to a file.</p>
+	<p>The cached files contain a serialized array with an expiration timestamp (Expire) and the cache content (Data). When a cache is read the expiration time is checked to make sure that the cache hasn't expired. If it has expired the cache file is removed.</p>
+	<p>In addition to standard caching functionality this adds the ability to cache data in <a href="http://en.wikipedia.org/wiki/Namespace" rel="external">namespaces</a>. This allows you to easily flush a single namespace without having to flush the entire cache.</p>
+	<p>The <strong>flush()</strong> method has been disabled in the filecache to prevent an accidental recursive deletion of something that shouldn't be deleted.</p>
+	<p>The <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#cache">cache configuration</a> file defines the type of file system to use, the root path relative to the filesystem's folder root (as defined in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#global">global configuration</a> file), and the number of levels deep to create a <a href="http://en.wikipedia.org/wiki/Hash_function" rel="external">hash</a> path.</p>
+	
+	<br />
+	
+	<h2>Configuration Example</h2>
+	<?php print Markup::formatCode('
+		//the cache type must have a corresponding class
+		$arrConfig[\'Type\'] = \'Filecache\';
+		
+		
+		//the cache filesystem for the base tier; the base path is relative to the files dir
+		$arrConfig[\'Tiers\'][\'Base\'] = array(
+		    \'FileSystem\'		=> \'Local\',
+		    \'RootPath\'		=> \'app/cache/base/\',
+		    \'HashLevel\'		=> 10
+		);
+		
+		
+		//the cache filesystem for the presentation tier; the base path is relative to the files dir
+		$arrConfig[\'Tiers\'][\'Presentation\'] = array(
+		    \'FileSystem\'		=> \'Local\',
+		    \'RootPath\'		=> \'app/cache/presentation/\',
+		    \'HashLevel\'		=> 10
+		);
+	'); ?>
+</div>

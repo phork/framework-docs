@@ -1,0 +1,163 @@
+<div id="content">
+	<h1 class="headline">CoreModelHelper</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreModelHelper.class.php</em></div>
+	
+	<p>The CoreModelHelper class is an abstract class that all model helpers should extend. Each model can have zero or more helper objects associated with it. A helper is a standardized object that can be shared amongst the models to register and run events at certain times. Phork comes with several pre-defined helpers:</p>
+	<ul>
+		<li><a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelBackup/">ModelBackup</a> is used to back up a record to a separate database table before deleting it from the table it's currently in.</li>
+		<li><a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelCache/">ModelCache</a> attempts to load the data from the cache before loading from the standard data source. If found it cancels the regular loading. If not found after the data has been loaded normally it can save it to the cache.</li>
+		<li><a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelDatabase/">ModelDatabase</a> changes the database before and after loading, saving, and deleting a record for any models that use a different database from the standard one defined.</li>
+		<li><a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelRelations/">ModelRelations</a> loads pre-defined relationships into the record after it has been loaded. For example if a user has many blogs it could load their latest 10.</li>
+		<li><a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelValidation/">ModelValidation</a> validates a record before saving it. If the record doesn't validate it cancels the saving process.</li>
+		<li><a href="<?php echo($strBaseUrl); ?>/manual/ext/helpers/ModelWorkflow/">ModelWorkflow</a> saves a serialized record in a workflow table, allowing it go through an approval process before it's finally updated in its usual table.</li>
+	</ul>
+	
+	<br />
+	
+	<p>A helper object is appended to a model object and then initialized. The initialization registers one or more <a href="<?php echo($strBaseUrl); ?>/manual/overview/events/">events</a> to run at certain points during the model. Any data returned from the event is available in the method that called it. For example the cache helper can return $blnSkipLoad and $blnResult flags so the data isn't loaded from the database. The default events are:</p>
+	<ul>
+		<li>before loading</li>
+		<li>after loading</li>
+		<li>before saving</li>
+		<li>after saving</li>
+		<li>before deleting</li>
+		<li>after deleting</li>
+	</ul>
+	
+	<p>Helpers can either be appended in the model's constructor or at run time using <strong>appendHelper()</strong>. Any helper that defines data that remains constant throughout a class (such as a validation helper or a relations helper) should be appended in the constructor and removed but not destroyed. Appended helpers aren't actually used until they've been initialized with <strong>initHelper()</strong> so a model can have the relations defined in the appended helper but they won't be used unless the helper has been initialized.</p>
+	<p>To remove a helper you can either remove it with <strong>removeHelper()</strong> or destroy it with <strong>destroyHelper()</strong>. Removing it essentially uninitializes it, meaning it can be reinitialized later. Destroying it removes it all together and it will need to be appended again in order to be used.</p>
+	
+	<br />
+	
+	<h2>Validation Helper (from a model constructor)</h2>
+	<?php print Markup::formatCode('
+		if (AppLoader::includeExtension(\'helpers/\', \'ModelValidation\')) {
+		    $this->appendHelper(\'validation\', \'ModelValidation\', array(
+		        \'Id\'              => array(
+		            \'Property\'        => \'userid\',
+		            \'Unique\'          => true,
+		            \'Type\'            => \'integer\',
+		            \'Error\'           => \'Invalid ID\'
+		        ),
+		        
+		        \'Username\'        => array(
+		            \'Property\'       => \'username\',
+		            \'Unique\'         => true,
+		            \'Required\'       => true,
+		            \'Type\'           => \'string\',
+		            \'RegEx\'          => \'/^[0-9a-z]{3,20}$/i\',
+		            \'Error\'          => \'Invalid username. It must be between 3 and 20 characters in length, containing only a-z and 0-9.\',
+		        ),
+		
+		        \'Password\'        => array(
+		            \'Property\'       => \'password\',
+		            \'Required\'       => true,
+		            \'Type\'           => \'string\',
+		            \'Error\'          => \'Invalid password\'
+		        ),
+		        
+		        \'Email\'           => array(
+		            \'Property\'       => \'email\',
+		            \'Unique\'         => true,
+		            \'Required\'       => true,
+		            \'Type\'           => \'email\',
+		            \'CheckMx\'        => false,
+		            \'Error\'          => \'Invalid email address\'
+		        ),
+		        
+		        \'Birthdate\'       => array(
+		            \'Property\'       => \'birthdate\',
+		            \'Required\'       => true,
+		            \'Type\'           => \'string\',
+		            \'RegEx\'          => \'/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/\',
+		            \'Error\'          => \'Invalid birthdate\'
+		        )
+		    ));
+		    
+		    //initialize the validation helper
+		    $this->initHelper(\'validation\', array(\'validateAll\'));
+		}
+	'); ?>
+	
+	
+	<h2>Relations Helper (from a model constructor)</h2>
+	<?php print Markup::formatCode('
+		if (AppLoader::includeExtension(\'helpers/\', \'ModelRelations\')) {
+		    $this->appendHelper(\'relations\', \'ModelRelations\', array(
+		    
+		        //the options here are HasMany, HasOne, BelongsToMany and BelongsToOne
+		        \'HasMany\'         => array(
+		            \'Blogs\'          => array(
+		                \'LoadAs\'        => \'blogs\',
+		                \'AutoLoad\'      => false,
+		                \'ClassName\'     => \'BlogModel\',
+		                \'Dependent\'     => true,
+		                \'Conditions\'    => array(
+		                    array(
+		                        \'Column\'      => \'userid\',
+		                        \'Property\'    => $this->strPrimaryKey,
+		                        \'Operator\'    => \'=\'
+		                    )
+		                ),
+		                \'Order\'         => array(
+		                    array(
+		                        \'Column\'      => \'published\',
+		                        \'Sort\'        => \'desc\'
+		                    )
+		                ),
+		                \'Config\'        => array(
+		                    \'NoUserJoin\'      => true
+		                )
+		            ),
+		        )
+		    ));
+		    
+		    //initialize the relations if the auto load flag was set in the config, also set up the optional recursion level
+		    if (!empty($arrConfig[\'RelationsAutoLoad\'])) {
+		        $this->initHelper(\'relations\', array(\'loadAutoLoad\'), array(
+		            \'Recursion\' => isset($arrConfig[\'RelationsRecursion\']) ? $arrConfig[\'RelationsRecursion\'] : 0
+		        ));
+		    }
+		}
+    '); ?>
+	
+	
+	<h2>Run Time Example</h2>
+	<?php print Markup::formatCode('
+		//set up the relations in the user model but don\'t pass RelationsAutoLoad to initialize it
+		$objUser = new UserModel(array(
+		    \'Relations\' => true
+		));
+		
+		//initialize the relation to load the user\'s roles and blogs
+		$objUser->initHelper(\'relations\', array(\'loadSpecific\'), array(
+		    \'Relations\' => array(\'HasMany.Role\', \'HasMany.Blogs\')
+		));
+		
+		//load the user and the relationships
+		if ($objUser->loadById(1) && $objRecord = $objUser->first()) {
+		    //do something here
+		}
+		
+		//remove the helper but don\'t destroy it, this way it can be reinitialized
+		$objUser->removeHelper(\'relations\');
+	'); ?>
+	
+	
+	<h2>Cache Helper</h2>
+	<?php print Markup::formatCode('
+		//set up the cache helper to attempt to load the data from the cache and to recache on failure
+		AppLoader::includeExtension(\'helpers/\', \'ModelCache\');
+		$objUser->appendHelper(\'cache\', \'ModelCache\');
+		$objUser->initHelper(\'cache\', array(\'preLoad\', \'postLoad\'), array(\'Namespace\' => \'test\', \'Expire\' => 60));
+		
+		if ($objUser->load(array(\'Limit\' => 2), true)) {
+		    while (list(, $objRecord) = $objUser->each()) {
+		        print \'username = \' . $objRecord->get(\'username\') . \'<br />\';
+		    }			
+		}
+		
+		//destroy the cache helper otherwise it will be applied to subsequent object loads
+		$objUser->destroyHelper(\'cache\');
+	'); ?>
+</div>

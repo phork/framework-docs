@@ -1,0 +1,29 @@
+<div id="content">
+	<h1 class="headline">CoreIterator</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreIterator.class.php</em></div>
+	
+	<p>The CoreIterator class stores a collection of items that can be iterated through, as well as providing methods to retrieve the first and last items, and to be able to add, modify and remove items. It implements PHP's <a href="http://us.php.net/manual/en/class.iterator.php" rel="external">Interator interface</a>.</p>
+	<p>There are currently 2 extensions to the CoreIterator class in <em>phork/php/ext/iterators/</em>.</p>	
+	<ul>
+		<li>Associative Iterator - This stores a collection of items as associative data, as opposed to the numeric format of the CoreIterator</li>
+		<li>Object Iterator - This stores a collection of objects with validation to make sure the items added are objects</li>
+	</ul>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		$objList = new ObjectIterator();
+		
+		$objList->append($objRecord1);
+		$objList->append($objRecord2);
+		$objList->append($objRecord3);
+		
+		$objList->removeByPosition(2);
+		
+		$objList->rewind();
+		while (list($intKey, $objRecord) = $objList->each()) {
+		    $objRecord->save();
+		}
+	'); ?>
+</div>

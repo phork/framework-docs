@@ -1,0 +1,97 @@
+<div id="content">
+	<h1 class="headline">CoreRecord</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreRecord.class.php</em></div>
+	
+	<p>The CoreRecord class is used in conjunction with the <a href="<?php echo($strBaseUrl); ?>/manual/overview/models/">models</a> to store a single data record. It has basic <strong>get()</strong> and <strong>set()</strong> methods and can be extended for custom functionality. For example when changing one field should automatically change another field.</p>
+	
+	<br />
+	
+	<h2 id="userrecord">UserRecord Example</h2>
+	<?php print Markup::formatCode('
+		require_once(\'php/core/CoreRecord.class.php\');
+		
+		class UserRecord extends CoreRecord {
+		
+		    /**
+		     * Sets the value of the property to the value passed.
+		     * This has been extended to set the encrypted password
+		     * whenever a decrypted password is set. If no decrypted
+		     * password is set then the encrypted password remains
+		     * the same. This also breaks out / pieces together the
+		     * birthdate values and calculates the roles from the
+		     * array of bits.
+		     *
+		     * @access public
+		     * @param string $strProperty The name of the property to set
+		     * @param mixed $mxdValue The value to set the property to
+		     * @return mixed The value the property was set to
+		     */
+		    public function set($strProperty, $mxdValue) {
+		        $this->$strProperty = $mxdValue;
+		        switch ($strProperty) {
+		            case \'password_plaintext\':
+		                if ($mxdValue) {
+		                    $this->set(\'password\', PasswordHelper::encryptPassword($mxdValue));
+		                }
+		                break;
+		                
+		            case \'rolebits\':
+		                $this->set(\'roles\', !empty($mxdValue) ? array_sum($mxdValue) : 0);
+		                break;
+		            
+		            case \'birthdate\':
+		                if (preg_match(\'/([0-9]{4})-([0-9]{2})-([0-9]{2})/\', $mxdValue, $arrMatches)) {
+		                    $this->birthdate_year = $arrMatches[1];
+		                    $this->birthdate_month = $arrMatches[2];
+		                    $this->birthdate_day = $arrMatches[3];
+		                }
+		                break;
+		                
+		            case \'birthdate_year\':
+		            case \'birthdate_month\':
+		            case \'birthdate_day\':
+		                if (($intYear = $this->get(\'birthdate_year\')) && ($intMonth = $this->get(\'birthdate_month\')) && ($intDay = $this->get(\'birthdate_day\'))) {
+		                    $this->birthdate = sprintf(\'%04d-%02d-%02d\', $intYear, $intMonth, $intDay);
+		                } else {
+		                    $this->birthdate = null;
+		                }
+		                break;
+		        }
+		        return $this->$strProperty;
+		    }
+		}
+	'); ?>
+	
+	
+	<h2 id="userrecord">Serialized Data Example</h2>
+	<?php print Markup::formatCode('
+		require_once(\'php/core/CoreRecord.class.php\');
+		
+		class SerializedRecord extends CoreRecord {
+		
+		    /**
+		     * Sets the value of the property to the value passed.
+		     * This has been extended to store the serialized and
+		     * unserialized metadata.
+		     *
+		     * @access public
+		     * @param string $strProperty The name of the property to set
+		     * @param mixed $mxdValue The value to set the property to
+		     * @return mixed The value the property was set to
+		     */
+		    public function set($strProperty, $mxdValue) {
+		        $this->$strProperty = $mxdValue;
+		        switch ($strProperty) {
+		            case \'rawdata\':
+		                $this->encoded = $mxdValue ? base64_encode(serialize($mxdValue)) : null;
+		                break;
+		        
+		            case \'encoded\':
+		                $this->rawdata = $mxdValue ? unserialize(base64_decode($mxdValue)) : null;
+		                break;
+		        }
+		        return $this->$strProperty;
+		    }
+		}
+	'); ?>
+</div>

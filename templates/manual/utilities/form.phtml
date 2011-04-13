@@ -1,0 +1,24 @@
+<div id="content">
+	<h1 class="headline">Form</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Form.class.php</em></div>
+	
+	<p>The Form class is used to generate HTML form tags. It has the standard form elements (checkbox, radio button, textarea, textbox, password, hidden, select, file, button, and submit) as well as custom methods for month dropdowns and select boxes with ranges.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		print Form::getCheckbox($strName, $mxdValue, $blnChecked = false, $arrParams = null);
+		print Form::getRadioButton($strName, $mxdValue, $blnChecked = false, $arrParams = null);
+		print Form::getTextarea($strName, $strValue = null, $arrParams = null);
+		print Form::getTextbox($strName, $mxdValue = null, $arrParams = null);
+		print Form::getPasswordBox($strName, $mxdValue = null, $arrParams = null);
+		print Form::getHidden($strName, $mxdValue, $arrParams = null);
+		print Form::getSelect($strName, $arrValues, $arrSelected = array(), $arrParams = null, $strFirstOption = null);
+		print Form::getFile($strName, $arrParams = null);
+		print Form::getButton($strName, $mxdValue, $arrParams = null);
+		print Form::getSubmit($strName, $mxdValue, $arrParams = null);
+		print Form::getSelectMonth($strName, $arrSelected = array(), $arrParams = null, $strFirstOption = null);
+		print Form::getSelectRange($strName, $intStart, $intEnd, $arrSelected = array(), $arrParams = null, $strFirstOption = null);
+	'); ?>
+</div>

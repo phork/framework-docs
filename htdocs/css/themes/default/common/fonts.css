@@ -1,0 +1,14 @@
+/* CHUNK FIVE */
+
+@font-face {
+	font-family: 'ChunkFiveRegular';
+	src: url('/css/fonts/chunkfive/Chunkfive-webfont.eot');
+	src: local('☺'), url('/css/fonts/chunkfive/Chunkfive-webfont.woff') format('woff'), url('/css/fonts/chunkfive/Chunkfive-webfont.ttf') format('truetype'), url('/css/fonts/chunkfive/Chunkfive-webfont.svg#webfontb5K2fJwj') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.headline,
+.chunkfive {
+	font-family: 'ChunkFiveRegular', Helvetica, Arial, sans-serif;
+}

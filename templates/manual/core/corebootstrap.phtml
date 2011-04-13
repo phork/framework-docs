@@ -1,0 +1,68 @@
+<div id="content">
+	<h1 class="headline">CoreBootstrap</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreBootstrap.class.php</em> and <em>phork/php/app/AppBootstrap.class.php</em></div>
+	
+	<p>The CoreBootstrap does most of the heavy lifting before delegating the page-specific functionality to a <a href="<?php echo($strBaseUrl); ?>/manual/overview/controllers/">controller</a>. The <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">boostrapping</a> chapter has a more in-depth overview of what a bootstrap does.</p>
+	<p>This class is broken up into several small methods which should make it easier to extend. The most commonly overriden methods include:</p>
+	<?php print Markup::formatCode('
+		protected function setPaths();
+		protected function loadConfig();
+		protected function loadLanguage();
+		protected function loadLibs();
+		protected function initDebugging();
+		protected function startSession();
+		public function fatal($intErrorCode = null);
+		public function determineController();
+	'); ?>
+	
+	<p>The default controller is defined in CoreBootstrap as <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreControllerLite/">CoreControllerLite</a> however this can be changed across all sites in AppBootstrap, or changed on a per-site basis by extending the bootstrap, for example <em>phork/sites/[sitetype]/bootstraps/SiteBootstrap.class.php</em>. The default controller is generally only called for the site's index page if it hasn't been explicitly routed to a new controller. The rest of the pages usually have their own controller. See the <a href="<?php echo($strBaseUrl); ?>/manual/overview/routing/">routing</a> chapter for more information on how the controller is determined.</p>
+	<p>It's possible to use the public <strong>changeController()</strong> method to forward processing to a different controller. This is usually called from a hook or another controller. The <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreUrl/">CoreUrl</a> chapter details a similar method of forwarding that also changes the application's CoreUrl properties.</p>
+	
+	<br />
+	
+	<h2>Controller Forwarding Example</h2>
+	<?php print Markup::formatCode('
+		$objBootstrap = AppRegistry::get(\'Bootstrap\');
+		$objBootstrap->changeController(\'MyNewController\');
+	'); ?>
+	
+	
+	<h2>Default Controller Extension Example</h2>
+	<?php print Markup::formatCode('
+		require_once(\'php/core/CoreBootstrap.class.php\');
+		
+		class SiteBootstrap extends CoreBootstrap {
+		    protected $strDefaultController = \'SiteController\';
+		}
+	'); ?>
+	
+	
+	<h2>Bootstrap with Beta Site Example</h2>
+	<?php print Markup::formatCode('
+		require_once(\'php/core/CoreBootstrap.class.php\');
+		
+		class SiteBootstrap extends CoreBootstrap {
+		    protected $strDefaultController = \'SiteController\';
+		    
+		    /**
+		     * Determines which controller to use based on the
+		     * parsed URL. Has special handling to allow a forced
+		     * beta site for unlogged in users.
+		     *
+		     * @access public
+		     * @return string The controller to use
+		     */
+		    public function determineController() {
+		        if (AppConfig::get(\'PrivateBeta\', false) && !in_array(AppRegistry::get(\'Url\')->getSegment(0), array(\'api\', \'concat\'))) {
+		            if ($objUserLogin = AppRegistry::get(\'UserLogin\', false)) {
+		                if ($blnLoggedIn = $objUserLogin->isLoggedIn()) {
+		                    return parent::determineController();
+		                }
+		            }
+		            return \'BetaController\';
+		        }
+		        return parent::determineController();
+		    }
+		}
+	'); ?>
+</div>

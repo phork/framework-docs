@@ -1,0 +1,48 @@
+<div id="content">
+	<h1 class="headline">CoreException</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/core/CoreException.class.php</em></div>
+	
+	<p>The CoreException class is used to handle any application errors that occur, whereas user generated errors use <a href="http://us.php.net/trigger_error" rel="external">trigger_error()</a> and <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreError/">CoreError</a>. The PHP manual has more information on <a href="http://us.php.net/manual/en/language.exceptions.php" rel="external">exceptions</a> and how they work.</p>
+	<p>The CoreException constructor sets up itself as the exception handler as well. When an uncaught exception is encountered it prints a backtrace of what happened.</p>
+	<p>Generally you'll want to catch exceptions and display a user friendly error of some sort, however if verbose errors are turned on in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#global">global configuration</a> then you can display a backtrace of the problem.</p>
+	
+	<br />
+	
+	<h2>Example Exception</h2>
+	<?php print Markup::formatCode('
+		throw new CoreException(\'This is an exception\');
+	'); ?>
+	
+	
+	<h2>Example Handling (from index.php)</h2>
+	<?php print Markup::formatCode('
+		//register and run the bootstrap to build the page
+		try { 
+		    $objBootstrap = new SiteBootstrap(array(
+		        \'strInstallDir\'       => $strInstallDir,
+		        \'strSiteDir\'          => $strSiteDir,
+		        \'strConfigDir\'        => $strConfigDir
+		    ));
+		    AppRegistry::register(\'Bootstrap\', $objBootstrap);
+		    $objBootstrap->run();    
+		}
+		    
+		//handle core exceptions by showing details or a generic error
+		catch (CoreException $objException) {
+		    if (AppConfig::get(\'ErrorVerbose\')) {
+		        $objException->handleException();
+		    } else {
+		        $objException->flushBuffer();
+		        if ($objError = AppRegistry::get(\'Error\', false)) {
+		            $arrErrors = $objError->flushErrors();
+		        }
+		        require(AppConfig::get(\'TemplateDir\') . \'system/error.phtml\');
+		    }
+		}
+		
+		//handle any other exceptions with a generic message
+		catch (Exception $objException) {
+		    print \'There was a fatal error\';
+		}
+	'); ?>
+</div>

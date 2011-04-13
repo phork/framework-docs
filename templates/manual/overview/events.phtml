@@ -1,0 +1,25 @@
+<div id="content">
+	<h1 class="headline">Events</h1>
+
+	<p>Events allow you to predefine one or more callback functions to be executed later on in the application flow. They're handled by the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreEvent/">CoreEvent</a> class and are used primarily by the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>, the <a href="<?php echo($strBaseUrl); ?>/manual/overview/models/">models</a> and the <a href="<?php echo($strBaseUrl); ?>/manual/overview/display/">display</a>. They can, of course, be used anywhere else as well.</p>
+
+	
+	<h2>Bootstrap</h2>
+	<p>The bootstrap uses <em>bootstrap.prerun</em>, <em>bootstrap.preinit</em>, <em>bootstrap.postinit</em> and <em>bootstrap.postrun</em> events which are generally tied into with <a href="<?php echo($strBaseUrl); ?>/manual/overview/hooks/">hooks</a>.</p>
+	
+	
+	<h2>Models</h2>
+	<p>Models use events for <em>pre-load</em>, <em>post-load</em>, <em>pre-save</em>, <em>post-save</em>, <em>pre-delete</em>, <em>post-delete</em>, <em>pre-destroy</em> and <em>post-destroy</em> actions. Generally these events are defined in the constructor or a function called from the constructor. Model helpers that use <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreModelHelper/">CoreModelHelper</a> also use events. To register a model event it must also include the model's event key so events don't get mixed up between models.</p>
+	
+	<?php print Markup::formatCode('
+		AppEvent::register($this->strEventKey . \'.pre-save\', array($this, \'setDefaults\'));
+	'); ?>
+	
+	
+	<h2>Display</h2>
+	<p>The <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDisplay/">CoreDisplay</a> class uses <em>display.pre-headers</em> and <em>display.pre-output</em> events in the <strong>output()</strong> method to allow the application to run any final pre-output processing such as running a find and replace on the page contents.</p>
+	
+	
+	<h2>Controllers</h2>
+	<p>The <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreController/">CoreController</a> class uses the <em>controller.displaynode</em> event in the <strong>displayNode()</strong> method to register a function that will only load the node data if the node cache wasn't found.</p>
+</div>

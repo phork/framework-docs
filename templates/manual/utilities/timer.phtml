@@ -1,0 +1,43 @@
+<div id="content">
+	<h1 class="headline">Timer</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Timer.class.php</em></div>
+	
+	<p>The Timer class is used to calculate the execution time of your application. It can be used to time the entire page or to time different parts of the page.</p>
+	
+	<br />
+	
+	<h2>Basic Example</h2>
+	<?php print Markup::formatCode('
+		//initialize a new timer object
+		$objTimer = new Timer();
+		$objTimer->init();
+		
+		//the code here gets timed
+		
+		//get the total load time
+		$strLoadTime = $objTimer->getTime();
+	'); ?>
+	
+	
+	<h2>Interval Example</h2>
+	<?php print Markup::formatCode('
+		//initialize a new timer object
+		$objTimer = new Timer();
+		$objTimer->init();
+		
+		//the code here gets timed
+		
+		//add an interval relative to the start time
+		$objTimer->addInterval(\'foo\', false);
+		
+		//the code here gets timed
+		
+		//add an interval relative to the previous interval
+		$objTimer->addInterval(\'bar\', true);
+		
+		//get the interval array keyed by the name with the time in seconds 
+		$arrIntervals = $objTimer->getIntervals();
+		$numFooSeconds = $arrIntervals[\'foo\'];
+		$numBarSeconds = $arrIntervals[\'bar\'];
+	'); ?>
+</div>

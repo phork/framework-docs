@@ -1,0 +1,39 @@
+<div id="content">
+	<h1 class="headline">CoreControllerLite</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreControllerLite.class.php</em></div>
+	
+	<p>The CoreControllerLite class is the most basic controller that can either be used as is or extended as necessary. It determines which method to call based on the URL and handles page not found errors gracefully.<p>
+	<p>All the controllers must implement the Controller interface found at <em>phork/php/core/interfaces/Controller.interface.php</em>.</p>
+	
+	<br />
+	
+	<h2>Display Content Example</h2>
+	<?php print Markup::formatCode('
+		//the display method called from http://www.example.org/foo/bar/
+		public function displayBar() {
+		    
+		    //the template path is relative to the template directory and excludes the .phtml extension
+		    $strTemplate = $this->getTemplatePath(\'path/to/template\');		   
+		   	if ($this->validateFile($strTemplate)) {
+		        AppDisplay::getInstance()->appendTemplate(\'content\', $strTemplate, array_merge($this->arrPageVars, array(
+		            \'strTemplateString\'	=> \'foo\',
+		            \'intTemplateInteger\'	=> 42
+		        )));
+		    }
+		}
+	'); ?>
+	
+	
+	<h2>Including a Template From Within a Template Example</h2>
+	<?php print Markup::formatCode('
+		//this goes in a controller
+		public function includeMessage($strMessage) {
+		    $this->includeTemplateFile($this->getTemplatePath(\'common/message\'), array(
+		        \'strMessage\' => $strMessage
+		    ));
+		}
+		
+		//this goes in a [template].phtml file
+		AppRegistry::get(\'Controller\')->includeMessage(\'foobar\');
+	'); ?>
+</div>

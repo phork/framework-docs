@@ -1,0 +1,25 @@
+<div id="content">
+	<h1 class="headline">CoreDatabaseScaffoldModel</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreDatabaseScaffoldModel.class.php</em></div>
+	
+	<p>The CoreDatabaseScaffoldModel class is an extension of the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDatabaseModel/">CoreDatabaseModel</a> class that's used to work with data stored in a database. The primary difference is that no data definitions are inherent to the scaffolded class. When instantiated it queries the database to determine the columns in it.</p>
+	<p>This shouldn't be used in a production environment. It should be used in development when you need a quick and dirty way to work with the database.</p>
+	
+	<br />
+	
+	<h2>Basic Example</h2>
+	<?php print Markup::formatCode('
+		//scaffold the foo table
+		AppLoader::includeClass(\'php/core/\', \'CoreDatabaseScaffoldModel\');
+		$objScaffold = new CoreDatabaseScaffoldModel(array(\'Table\' => \'foo\'));
+		
+		//load all the records from the foo table
+		if ($objScaffold->load() && $objScaffold->count()) {
+		
+		    //pass each record off to a pre-defined formatting function
+		    while ($objRecord = $objScaffold->passthru(array($objFormatter, \'formatRecord\'), \'each\')) {
+		        print_r($objRecord);
+		    }
+		}
+	'); ?>
+</div>

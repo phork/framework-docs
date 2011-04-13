@@ -1,0 +1,19 @@
+<div id="content">
+	<h1 class="headline">ModelDatabase</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/helpers/ModelDatabase.class.php</em></div>
+	
+	<p>The ModelDatabase helper is used in conjunction with the <a href="<?php echo($strBaseUrl); ?>/manual/database/DatabaseManager/">DatabaseManager</a> to change the database before loading, saving and deleting records, and to change it back afterwards.</p> 
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		AppLoader::includeExtension(\'helpers/\', \'ModelDatabase\')
+		$objModel->appendHelper(\'database\', \'ModelDatabase\');
+		$objModel->initHelper(\'database\', array(\'preLoad\', \'preSave\', \'preDelete\'), array(
+		    \'Database\' => \'foo\'
+		));
+		...
+		$objModel->destroyHelper(\'database\');
+	'); ?>
+</div>

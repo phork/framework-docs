@@ -1,0 +1,67 @@
+<div id="content">
+	<h1 class="headline">Database</h1>
+	
+	<p>Phork was built using <a href="http://www.mysql.com/" rel="external">MySQL</a>, although it can be extended to use numerous other SQL databases. In order to add another database class it must implement the Sql interface and extend the <a href="<?php echo($strBaseUrl); ?>/manual/database/DatabaseAdaptor/">DatabaseAdaptor</a> class. To use a new database class change $arrDatabase['Type'] to the new class name in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#database">database configuration</a>.</p>
+	<p>The <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a> automatically sets up the database using the <a href="<?php echo($strBaseUrl); ?>/manual/database/DatabaseFactory/">DatabaseFactory</a> class. The database classes are in <em>phork/php/database/</em>. The <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#database">database configuration</a> file is used to define usernames, password, hosts, database names, etc. for the read and write databases.</p>
+	
+	<h2>Query Generator</h2>
+	<p>Each database class should come with a corresponding query generator class (eg. <a href="<?php echo($strBaseUrl); ?>/manual/database/MySqlQuery/">MySqlQuery</a>). Using the query generator isn't required, but it handles things like escaping strings automatically and helps make the application more portable.</p>
+	
+	<br />
+
+	<h2>Example Read Query</h2>
+	<?php print Markup::formatCode('
+		//connect to the database and set it up for reads
+		$objDb = AppRegistry::get(\'Database\');
+		if ($objDb->initRead(true)) {
+			
+		    //run the select query
+		    if (($mxdResult = $objDb->read("SELECT * FROM mytable LIMIT 10")) !== false) {
+		        while ($arrRow = $objDb->fetchRow($mxdResult)) {
+					
+		            //do something with $arrRow here
+		        }
+		        $objDb->freeResult($mxdResult);
+		    }
+		}
+	'); ?>
+	
+	
+	<h2>Example Write Query</h2>
+	<?php print Markup::formatCode('
+		//connect to the database and set it up for writes
+		$objDb = AppRegistry::get(\'Database\');
+		if ($objDb->initWrite(true)) {
+			
+		    //run the insert query
+		    if (($mxdResult = $objDb->write("INSERT INTO mytable (foo, bar) VALUES (\'abc\', \'def\')")) !== false) {
+		        
+		        //make sure a result was returned and get the inserted ID
+		        if ($blnResult = ($mxdResult != false)) {
+		            $intId = $objDb->getInsertedId();
+		        }
+				
+		        $objDb->freeResult($mxdResult);
+		        return $blnResult;
+		    }
+		}
+	'); ?>
+	
+	
+	<h2>Example Test Query</h2>
+	<?php print Markup::formatCode('
+		//connect to the test database
+		$objDb = AppRegistry::get(\'Database\');
+		if ($objDb->initConnection(\'Test\', true)) {
+			
+		    //run the select query
+		    if (($mxdResult = $objDb->read("SELECT * FROM mytable LIMIT 10")) !== false) {
+		        while ($arrRow = $objDb->fetchRow($mxdResult)) {
+					
+		            //do something with $arrRow here
+		        }
+		        $objDb->freeResult($mxdResult);
+		    }
+		}
+	'); ?>
+</div>

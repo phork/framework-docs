@@ -1,0 +1,31 @@
+<div id="content">
+	<h1 class="headline">CoreError</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreError.class.php</em></div>
+	
+	<p>The CoreError class is Phork's custom error handler that's set up in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>. Any system errors or errors generated with <a href="http://us.php.net/trigger_error" rel="external">trigger_error()</a> go through the error handler class. Fatal application errors that are a result of incorrect code (rather than errors that result from something the user did) should use the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreException/">CoreException</a> class.</p>
+	<p>PHP's <a href="http://us.php.net/manual/en/errorfunc.configuration.php#ini.error-reporting" rel="external">error reporting</a> must include E_USER_NOTICE so that Phork's custom errors can be handled properly. The error reporting level is set in the front controller (index.php).</p>
+	<p>Errors can also be logged to a file depending on the $arrConfig['ErrorLogNotice'], $arrConfig['ErrorLogWarning'], and $arrConfig['ErrorLogError'] settings in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#global">global configuration</a> file.</p>
+	<p>The error object also supports error groups. Groups are used when you want to track errors from a particular subset of code.</p>
+	
+	<br />
+	
+	<h2>Basic Example</h2>
+	<?php print Markup::formatCode('
+		trigger_error(\'There was an error\');
+		$arrErrors = AppRegistry::get(\'Error\')->flushErrors();
+	'); ?>
+	
+	
+	<h2>Group Example</h2>
+	<?php print Markup::formatCode('
+		$objError = AppRegistry::get(\'Error\');
+		$objError->startGroup(\'myErrors\');
+		
+		trigger_error(\'There was an error\');
+		
+		if ($intGroupErrors = $objError->endGroup(\'myErrors\')) {
+		    $arrErrors = $objError->getGroupErrors(\'myErrors\');
+		    $objError->clearGroupErrors(\'myErrors\');
+		}
+	'); ?>
+</div>

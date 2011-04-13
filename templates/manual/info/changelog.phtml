@@ -1,0 +1,172 @@
+<div id="content">
+	<h1 class="headline">Change Log</h1>
+	
+	<h2>Version 1.3.6</h2>
+	<p><em>Release date: March 13, 2011</em></p>
+	<p>Changed the error() method in CoreControllerLite and the Controller interface to accept an optional exception string as the second argument.</p>
+	<p>Added close() method to the CoreBootstrap.</p>
+	<p>Changed the MysqlQuery class to allow buildInsertOrUpdateQuery() to accept update values that differ from insert.</p>
+	<p>Added GroupBy support to the CoreDatabaseModel addQueryFilters() method.</p>
+	<p>Added ^ as a valid WHERE operators in the MysqlQuery class.</p>
+	<p>Changed the ModelRelations helper to add a new BatchLoader option.</p>
+	<p>Added optional WithTable paramter to ModelRelations filters.</p>
+	<p>Added a choice between &lt;input&gt; and &lt;button&gt; options form the button and submit elements in the Form class.</p>
+	<p>The token verification in the CommonHooks class now sends a 400 error (used to be 500) on failure.</p>
+	<p>No need to pass the exception object to the exception handler.</p>
+	<p>Fixed a bug with ModelValidation::validateUnique() that caused row counts to happen for each unique check.</p>
+	<p>Added optional language file cache to the CoreLanguage class.</p>
+	<p>Added AllowScript flag to the ScriptBootstrap, which is checked for in the ScriptController.</p>
+	<p>CoreApi calls called from the batch handler don't get the internal flag.</p>
+	<p>Renamed LocalFileSystemHandler and AmazonFileSystemHandler to just LocalFileSystem and AmazonS3FileSystem.</p>
+	<p>Fixed the way AmazonS3FileSystem handles files.</p>
+	
+	<h2>Version 1.3.5</h2>
+	<p><em>Release date: October 31, 2010</em></p>
+	<p>Changed the Form utility to use htmlspecialchars() instead of htmlentities().</p>
+	<p>Added a zero pad option to Form::getSelectRange().</p>
+	<p>Added getHelper() method to the CoreModel class.</p>
+	<p>Added disableField() and enableField() methods to the ModelValidation class.</p>
+	<p>Added a flag to CoreError::error() to allow the error to be first in the array.</p>
+	<p>Added nodeExists() to the CoreDisplay object.</p>
+	<p>Added AppConfig::get('InstallDir') calls before all CoreLoader includes in the Phork php directory.</p>
+	<p>Changed CoreLoader::getIncludePath() so it doesn't check all include paths for absolute paths passed.</p>
+	<p>Moved the load time and peak memory usage output from index.php into the SiteBootstrap in the standard site.</p>
+	
+	<h2>Version 1.3.4</h2>
+	<p><em>Release date: July 19, 2010</em></p>
+	<p>Changed CacheHooks to use getCurrentUrl() instead of getUrl() to account for query strings.</p>
+	<p>Changed CacheAdaptor to allow colons (:) and pipes (|) in cache keys and changed the namespace format to use pipes.</p> 
+	<p>Changed CoreError to allow group stacks, and also to allow grouped errors to remain out of the global errors array.</p>
+	<p>Added batch API processing to the CoreApi class.</p>
+	<p>Added an ApiHelper utility class to make internal API calls without an extra HTTP request.</p>
+	<p>Changed the class_exists() || require() calls in the CoreBootstrap to not try to autoload.</p>
+	
+	<h2>Version 1.3.3</h2>
+	<p><em>Release date: May 27, 2010</em></p>
+	<p>Changed CoreBootstrap to destroy events after running them.</p>
+	<p>Added clearCache() method to the ModelCache helper which dispatches to a CacheHelper utility.</p>
+	<p>Added getCacheNamespace() method to the ModelCache helper so namespaces can be assigned dynamically in extensions.</p>
+	<p>Changed CoreDatabaseModel so the addQueryFilters() method can handle __id as a column value.</p>
+	<p>Changed CoreDatabaseModel so the addQueryFilters() method can accept HAVING filters.</p>
+	<p>Changed CoreDatabaseModel so the addQueryFilters() method can sort randomly.</p>
+	<p>Added BETWEEN filter to the MySqlQuery class.</p>
+	<p>Added setAlerts() to CoreAlert.</p>
+	<p>Changed CoreApi to add any alerts to the result.</p>
+	<p>Added exists() and removeDatabase() methods to the DatabaseManager class.</p>
+	<p>Renamed ModelTest helper to the more generic ModelDatabase.</p>
+	<p>Changed the DatabaseFactory constructor to accept a config array as well as config file name.</p>
+	<p>Added database cache classes (DbcacheTiered, CacheModel, CacheRecord).</p>
+	<p>Force API HEAD calls to GET.</p>
+	<p>Added Compress flag to the AccessHooks page cache.</p>
+	<p>Added query string support to the ConcatHelper class when including JS files.</p>
+	<p>Added setRoutedUrl() to CoreUrl.</p>
+	<p>Changed MySQL BETWEEN query to put quotes around values.</p>
+	
+	<h2>Version 1.3.2</h2>
+	<p><em>Release date: April 11, 2010</em></p>
+	<p>Changed CoreBootstrap to allow controllers to have numbers in them.</p>
+	<p>CoreBootstrap now sends a 404 header when the controller can't be found in verbose error mode.</p>
+	<p>Changed CoreConfig, CoreDisplay, CoreEvent, CoreLanguage, CoreLoader, CoreRegistry and CoreUrl to abstract classes.</p> 
+	<p>Changed CoreLoader to a singleton. Static methods still work as usual. Extensions will need to call self::getInstance()->method() instead of self::method().</p>
+	<p>Added includeFile() method to CoreLoader.</p>
+	<p>Added a class extension property to the CoreLoader class.</p>
+	<p>Changed CoreUrl::setUrl() to parse out the query string.</p>
+	<p>Added CoreError::setErrors() method and renamed appendError() to error() and made it public.</p>
+	<p>Changed CoreDisplay::setErrorCode() to CoreDisplay::setStatusCode() and added http.config.php error codes.</p>
+	<p>Added CoreApi, the ApiHelper utility and an ApiController class to the standard site.</p>	
+	<p>CoreControllerLite now sends an HTTP response header before throwing the exception in error().</p>
+	<p>The error() method in CoreControllerLite only uses the generic "Fatal error" when no other errors have been triggered.</p>
+	<p>Added getConfig() method to CoreModel.</p>
+	<p>Added clearHelpers() method to CoreModel.</p>
+	<p>Added Sanitizer utility and incorporated it into the CoreModel::sanitize() method.</p>
+	<p>Added pre-save event to CoreModel to automatically sanitize all data before saving.</p>
+	<p>Added init() method to CoreModel to hold all helper initialization, and __clone() now calls init().</p>
+	<p>The CoreDatabaseModel pre-load and post-load events get passed the $arrLoading data.</p>
+	<p>The setLoading() and clearLoading() methods are only called in the CoreDatabaseModel load() method if no wrapper method has set them.</p>
+	<p>Added setTable() method to CoreDatabaseModel.</p>
+	<p>Added extra $arrFilters and $blnCalcFoundRows params to CoreDatabaseModel::loadById().</p>
+	<p>Added items() method to the CoreIterator class to return all items.</p>
+	<p>Changed ObjectIterator's getAssociativeList() method to call get() instead of get[Foo]().</p>
+	<p>Changed MySqlQuery class to put quotation marks around the table name.</p>
+	<p>Added buildInsertOrUpdateQuery() to the MySqlQuery class.</p>
+	<p>Added optional seed to the random sort order in the MySqlQuery class.</p>
+	<p>Added isSelect(), isInsert(), isUpdate() and isDelete() to the MySqlQuery class.</p>
+	<p>Changed the MySqlQuery class to not required a "join using" value to allow for natural joins.</p>
+	<p>Added insert or update functionality to the MySqlQuery class.</p>
+	<p>Added optional ClassLoader parameter to the ModelRelations helper for the callback function to use to load the model when not using AppLoader::includeModel().</p>
+	<p>In the ModelValidation helper the custom validate function can now be an array called with call_user_func().</p>
+	<p>Added strlen() validation to strings, count() validation to arrays, and min and max value validation to ints and floats in the ModelValidation class.</p>
+	<p>Added ModelBackup helper to backup records before saving or deleting.</p>
+	<p>Added ModelCounter helper to update a record count in a different model on save or delete.</p>
+	<p>Moved CACHE_ADD_ONLY and CACHE_REPLACE_ONLY constants from CacheAdaptor to the Cache interface.</p>
+	<p>The loadMulti() method in the cache classes keys the results by the uncleaned keys.</p>
+	<p>Added decrement() to the Memcache classes.</p>
+	<p>Added urlencode() to base64 encoded concat URLs in the ConcatHelper utility.</p>
+	<p>Added getFilesDirectory(), setFilesDirectory() and setLenient() to the file system handlers.</p> 
+	<p>Added optional TempDir config value used by LocalFileSystemHandler.</p>
+	<p>Added FileHelper utility.</p>
+	<p>Added blnIncludeKeys option to the XmlBuilder utility.</p>
+	<p>Added htmlentities() to Form::getTextarea() value.</p>
+	<p>Changed verifyPost() to verifyRequest() in the Token utility.</p>
+	<p>Add reviveToken() to the Token utility.</p>
+	<p>Added ExampleApi class to the standard site.</p>
+	<p>Added an initDebugging() override to the standard and lite site bootstraps to use the DebugDisplay handler.</p>
+	
+	<h2>Version 1.3.1</h2>
+	<p><em>Release date: October 29, 2009</em></p>
+	<p>Added DatabaseManager class to manage multiple read and write database combinations.</p>
+	<p>Added getInsertAllQuery() method to CoreDatabaseModel to generate a query to insert all new loaded records.</p>
+	<p>Changed the Timer utility so microtime() returns a float.</p>
+	<p>Added $strMethodPrefix defaulted to 'display' to the controller.</p>
+	<p>Database model save events now have a blnNewRecord flag when a record is being inserted.</p>
+	<p>Added a success flag to all the post event calls in the CoreDatabaseModel class.</p>
+	<p>Added pre and post destroy callbacks to the CoreDatabaseModel class.</p>
+	<p>Cloning a CoreModel object clears out the iterator object.</p>
+	<p>Changed the CoreEvent class and the helper callbacks to accept explicit args instead of using func_get_args().</p>
+	<p>Added an optional $blnIgnore flag to the MySQL Query class for inserts and updates.</p>
+	<p>Added an insert() method to the iterators to insert an item at a certain position.</p>
+	<p>Added an optional argument to CoreEvent::register() to insert the event at a certain position.</p>
+	<p>Fixed the MySQL class getAffectedRows() method.</p>
+	
+	<h2>Version 1.3</h2>
+	<p><em>Release date: October 15, 2009</em></p>
+	<p>Added includeController, includeModel, includeHooks, and includeExtension classes to the CoreLoader class.</p>
+	<p>Replaced the CoreActiveRecord class with CoreModel, CoreDatabaseModel, CoreDatabaseScaffoldModel, CoreRecord and CoreModelHelper.</p>
+	<p>Added ModelCache, ModelRelations and ModelValidation helpers.</p>
+	<p>Added display.pre-output event to the display class right before the output is printed.</p>
+	<p>Changed the CoreEvent class to store the event actions in an AssociativeIterator object.</p>
+	<p>Changed CoreEvent::register() to return a unique event action key which can be used with the new CoreEvent::remove() function.</p>
+	<p>Added an option to the AssociativeIterator object to generate a unique key.</p>
+	<p>Fixed a bug with the AssociativeIterator breaking on array_search() returning 0.</p>
+	<p>Changed how the LocalFileSystemHandler works with temp files.</p>
+	<p>Changed CoreUrl so if there are multiple filters with the same name it creates an array instead of replacing them.</p>
+	<p>Changed the Form class to accept name/value pairs for the additional config params.</p>
+	<p>Added getTableColumns() to the MySql class.</p>
+	
+	<?php /*
+	<h2>Version 1.2</h2>
+	<p><em>Release date: October 6, 2009</em></p>
+	<p>Broke up sites' classes directories into models, controllers and bootstraps directories.</p>
+	<p>Removed the php/models directory in favor of the new site-specific models directory.</p>
+	<p>Changed set_include_path() in the front controller to only add the main Phork directory and the main site directory.</p>
+	<p>Changed every include path accordingly to account for new paths. <strong>This change affected nearly every file.</strong></p>
+	<p>The front controllers now pass the install dir, site dir and config dir to the bootstrap which then sets additional paths.</p>
+	<p>Changed CoreBootstrap to check class_exists() before including any app files.</p>
+	
+	<h2>Version 1.1</h2>
+	<p><em>Release date: October 2, 2009</em></p>
+	<p>Removed the auto_prepend.php file and split the code between the core bootstrap and each site's front controller.</p>
+	<p>Moved the config files into each site's directory.</p>
+	<p>Added the option of site-specific language translation files.</p>
+	<p>Added a scripts directory for each site instead of an application-wide scripts directory.</p>
+	<p>Reorganized fatal error handling in both controllers and each site's front controller.</p>
+	<p>Moved the hook registration from the front controller file into the site bootstrap.</p>
+	<p>Turned off mod rewrite by default in each site.config.php file.</p>
+	<p>Changed the .htaccess file and CoreUrl class to use PATH_INFO instead of REQUEST_URI.</p>
+	<p>Removed the constants.php file.</p>
+	
+	<h2>Version 1.0</h2>
+	<p><em>Release date: October 1, 2009</em></p>
+	<p>Phork 1.0 is the first publicly available release of Phork.</p>
+	*/ ?>
+</div>

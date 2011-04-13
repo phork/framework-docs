@@ -1,0 +1,53 @@
+<div id="content">
+	<h1 class="headline">CoreDisplay</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreDisplay.class.php</em> and <em>phork/php/app/AppDisplay.class.php</em></div>
+
+	<p>The CoreDisplay class is used to buffer and output all the content. It's also used to cache the content as necessary. Content in the display class consists of one or more nodes. If buffering is turned on then the the content nodes won't be displayed right away; they will be stored in the object and can be rearranged and will be displayed when the object has been destroyed or <strong>output()</strong> has been called manually. The benefit of this is that if, for example, there is an error node it can be added to the node list last so that it includes all errors from the content node, but it can be displayed before the content node when the page is built.</p>
+	<p>Generally all interaction with the display class happens in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/controllers/">controller</a>, however occasionally it can be beneficial to access it from index.php to perform a load time search and replace in the built output.</p>
+	<p>The display class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<br />
+	
+	<h2>Node Example</h2>	
+	<?php print Markup::formatCode('
+		$objDisplay = AppDisplay::getInstance();
+		
+		//setting the node order will turn output buffering on
+		$objDisplay->setNodeOrder(array(\'header\', \'errors\', \'content\', \'footer\'));
+		
+		//append the nodes to the display object
+		$objDisplay->appendTemplate(\'content\', $strTemplatePath . \'content.phtml\', $arrContentVars);
+		$objDisplay->appendTemplate(\'header\', $strTemplatePath . \'common/header.phtml\', $arrHeaderVars);
+		$objDisplay->appendTemplate(\'footer\', $strTemplatePath . \'common/footer.phtml\', $arrFooterVars);
+		$objDisplay->appendTemplate(\'errors\', $strTemplatePath . \'common/errors.phtml\', array(
+		    \'arrErrors\' => AppRegistry::get(\'Error\')->flushErrors()
+		));
+	'); ?>
+	
+	
+	<h2>Error Example</h2>	
+	<?php print Markup::formatCode('
+		$objDisplay = AppDisplay::getInstance();
+		$objDisplay->setStatusCode(404);
+		$objDisplay->appendTemplate(\'fatal\', $strTemplatePath . \'system/error.phtml\', array(
+		    \'strCssUrl\'		=> AppConfig::get(\'CssUrl\'),
+		    \'strJsUrl\'		=> AppConfig::get(\'JsUrl\'),
+		));
+	'); ?>
+	
+	
+	<h2>XML Example</h2>	
+	<?php print Markup::formatCode('
+		$objDisplay = AppDisplay::getInstance();
+		$objDisplay->appendHeader(\'Content-Type: text/xml\');
+		$objDisplay->appendString(\'content\', $strXml);
+	'); ?>
+	
+	
+	<h2>Replacement Example</h2>
+	<?php print Markup::formatCode('
+		$objDisplay = AppDisplay::getInstance();
+		$objDisplay->build();
+		$objDisplay->replace(\'<[LOAD TIME]>\', $strLoadTime);
+	'); ?>
+</div>

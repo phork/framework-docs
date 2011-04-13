@@ -1,0 +1,17 @@
+<div id="content">
+	<h1 class="headline">Socket</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Socket.class.php</em></div>
+	
+	<p>The Socket class is used for automatic form posting and returning of the resulting page. This uses <a href="http://us.php.net/fsockopen" rel="external">fsockopen()</a> and is a good alternative for servers without the <a href="http://us.php.net/manual/en/ref.curl.php" rel="external">cURL extension</a>.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		//post a form to http://www.example.org/foo/bar/ with $_POST[\'baz\'] = 42 and print the output
+		if ($strOutput = Socket::postForm(\'/foo/bar/\', array(\'baz\' => 42), \'http://www.example.org\')) {
+		    print $strOutput;
+		    exit;
+		}
+	'); ?>
+</div>

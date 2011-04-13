@@ -1,0 +1,25 @@
+<div id="content">
+	<h1 class="headline">Configuration</h1>
+	
+	<p>Phork has the option of defining configuration files for different server environments. More information can be found in the <a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/">installation instructions</a> but here we will assume you are working on a live server and so your configuration files will be found in <em>phork/sites/[sitetype]/config/live/</em>. These should have been copied from the example files at <em>phork/sites/[sitetype]/config/example/</em>. You can create as many config files as necessary which can then be loaded in using the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreConfig/">CoreConfig</a> class.</p>
+	
+	
+	<h2 id="global">Global Configuration</h2>
+	<p>The global configuration file (<strong>global.config.php</strong>) contains all the major configuration that is required by the website and any scripts. This includes error handling configuration, debugging, and the location of the PHP CLI binary. The explanations for each section are in the file itself. This file is included from the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>.</p>
+	
+	
+	<h2 id="site">Site Configuration</h2>
+	<p>The site configuration file (<strong>site.config.php</strong>) contains all the site-specific configurations, such as URLs, routing, titles, etc. The explanations for each section are in the file itself. This file is included from the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>.</p>
+	
+	
+	<h2 id="script">Script Configuration</h2>
+	<p>The script configuration file (<strong>script.config.php</strong>) contain all the script-specific configurations. This is usally pretty sparse but because scripts are handled similar to sites this file is required. The explanations for each section are in the file itself. This file is included from the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>.</p>
+	
+	
+	<h2 id="database">Database Configuration</h2>
+	<p>The database configuration file (<strong>database.config.php</strong>) contains the database type and server configuration for the database(s). This file is included from the <a href="<?php echo($strBaseUrl); ?>/manual/database/DatabaseFactory/">DatabaseFactory</a>.</p>
+	
+	
+	<h2 id="cache">Cache Configuration</h2>
+	<p>The cache configuration file (<strong>cache.config.php</strong>) contains the Memcache server configuration, the Filecache path configuration, or the Dbcache configuration for both the base tier (caching data) and the presentation tier (caching pages). This file is included from the <a href="<?php echo($strBaseUrl); ?>/manual/cache/CacheFactory/">CacheFactory</a>.</p>
+</div>

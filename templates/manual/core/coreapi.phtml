@@ -1,0 +1,406 @@
+<div id="content">
+	<h1 class="headline">CoreApi</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreApi.class.php</em></div>
+	
+	<p>The CoreApi class is the base class for all API classes. It works nearly the same as a controller however it returns the results in an array instead of outputting them. This allows for the results to then be displayed by the ApiController (<em>phork/sites/[sitetype]/controllers/ApiController.class.php</em>) or for the methods to be called internally using the ApiHelper (<em>phork/php/utilities/ApiHelper.class.php</em>) without having to translate the results to and from JSON or XML.</p>
+	<p>The CoreApi is set up so that it can be instantiated directly and will then delegate to the extensions based on the URL. If the API methods need calling internally without the additional HTTP request overhead this is possible by passing a new URL object populated with the necessary request data.</p>
+	
+	<br />
+	
+	<h2>API Example</h2>
+	<?php print Markup::formatCode('
+		require_once(\'SiteApi.class.php\');
+		
+		/**
+		 * TagsApi.class.php
+		 * 
+		 * This class handles all the tags API calls. This can
+		 * either be called via the ApiHelper class or by URL
+		 * using the ApiController.
+		 *
+		 * /api/tags/for=blog/featured.json                                     (GET: featured blog tags)
+		 * /api/tags/for=blog/trending.json                                     (GET: trending blog  tags)
+		 * /api/tags/for=photo/featured.json                                    (GET: featured photo tags)
+		 * /api/tags/for=photo/trending.json                                    (GET: trending photo tags)
+		 *
+		 * The following calls require authentication.
+		 *
+		 * /api/tags/for=blog/add/[blog id].json                                (POST: add a tag to a blog)
+		 * /api/tags/for=photo/add/[photo id].json                              (POST: add a tag to a photo)
+		 */
+		class TagsApi extends SiteApi {
+		
+		    /**
+		     * Maps the API method to a method within this class
+		     * and returns the response. If no method is mapped
+		     * then it attempts to use the core handler.
+		     *
+		     * @access protected
+		     */
+		    protected function handle() {
+		        $arrHandlers = array(
+		            \'featured\'        => \'GetFeatured\',
+		            \'trending\'        => \'GetTrending\',
+		            
+		            \'add\'             => \'DoAdd\'
+		        );
+		        
+		        $strSegment = str_replace(\'.\' . $this->strFormat, \'\', $this->objUrl->getSegment(2));
+		        if (!empty($arrHandlers[$strSegment])) {
+		            $strMethod = $this->strMethodPrefix . $arrHandlers[$strSegment];
+		            $this->$strMethod();
+		        } else {
+		            parent::handle();
+		        }
+		    }
+		    
+		    
+		    /**
+		     * Includes and instantiates a tag model class for
+		     * a tag relation based on the "for" filter in the
+		     * URL. For example BlogTagModel or PhotoTagModel.
+		     *
+		     * @access public
+		     * @return object The tag model
+		     */
+		    public function initModel() {
+		        AppLoader::includeModel($strTagModel = ucfirst($this->objUrl->getFilter(\'for\')) . \'TagModel\');
+		        $objTag = new $strTagModel();
+		        
+		        return $objTag;
+		    }
+		    
+		    
+		    /**
+		     * Gets the result parameters from the URL and returns
+		     * the data to be extracted by the display method.
+		     *
+		     * @access protected
+		     * @return array The compacted data
+		     */
+		    protected function getResultParams() {
+		        $intNumResults = !empty($this->arrParams[\'num\']) ? $this->arrParams[\'num\'] : 10;
+		        $intPage = !empty($this->arrParams[\'p\']) ? $this->arrParams[\'p\'] : 1;
+		        
+		        $arrFilters = array(
+		            \'Conditions\'      => array(),
+		            \'Limit\'           => $intNumResults, 
+		            \'Offset\'          => ($intPage - 1) * $intNumResults
+		        );
+		        
+		        if (!empty($this->arrParams[\'maxid\'])) {
+		            $arrFilters[\'Conditions\'][] = array(
+		                \'Column\'      => \'__id\',
+		                \'Value\'       => $this->arrParams[\'maxid\'],
+		                \'Operator\'    => \'<=\'
+		            );
+		        }
+		        if (!empty($this->arrParams[\'minid\'])) {
+		            $arrFilters[\'Conditions\'][] = array(
+		                \'Column\'      => \'__id\',
+		                \'Value\'       => $this->arrParams[\'minid\'],
+		                \'Operator\'    => \'>=\'
+		            );
+		        }
+		        
+		        return compact(\'arrFilters\');
+		    }
+		    
+		    
+		    /**
+		     * Verifies the parameters from the URL.
+		     *
+		     * @access protected
+		     * @return boolean True if valid
+		     */
+		    protected function verifyParams() {
+		        $blnResult = true;
+		        
+		        if (!empty($this->arrParams[\'num\']) && $this->arrParams[\'num\'] > ($intMaxResults = 50)) {
+		            $blnResult = false;
+		            trigger_error(AppLanguage::translate(\'The maximum number of results allowed is %d\', $intMaxResults));
+		        }
+		        
+		        return $blnResult;
+		    }
+		    
+		    
+		    /*****************************************/
+		    /**     HANDLER METHODS                 **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * Gets the featured tags. Defaults to 10 results but
+		     * is configurable.
+		     *
+		     * @access protected
+		     */
+		    protected function handleGetFeatured() {
+		        if ($this->verifyRequest(\'GET\') && $this->verifyParams()) {    
+		            if (!$this->loadFromCache()) {
+		                extract($this->getResultParams());
+		                
+		                $objTag = $this->initModel();
+		                if ($objTag->loadFeatured($arrFilters)) {
+		                    $this->blnSuccess = true;
+		                    if ($objTag->count()) {
+		                        $this->arrResult = array(
+		                            \'tags\' => $this->formatTags($objTag, false)
+		                        );
+		                    } else {
+		                        $this->arrResult = array(
+		                            \'tags\' => array()
+		                        );
+		                    }
+		                    
+		                    if ($intFoundRows = $objTag->getFoundRows()) {
+		                        $this->arrResult[\'total\'] = $intFoundRows;
+		                    }
+		                    
+		                    $this->saveToCache(600);
+		                } else {
+		                    trigger_error(AppLanguage::translate(\'There was an error loading the tag data\'));
+		                    $this->error();
+		                }
+		            }
+		        } else {
+		            $this->error(400);
+		        }
+		    }
+		    
+		    
+		    /**
+		     * Gets the trending tags. Defaults to 10 results but
+		     * is configurable. Coming soon.
+		     *
+		     * @access protected
+		     */
+		    protected function handleGetTrending() {
+		        if ($this->verifyRequest(\'GET\') && $this->verifyParams()) {    
+		            trigger_error(AppLanguage::translate(\'Trending tags are coming soon\'));
+		            $this->error(501);
+		        } else {
+		            $this->error(400);
+		        }
+		    }
+		    
+		    
+		    /*****************************************/
+		    /**     ACTION METHODS                  **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * Adds a tag to an item. This will update a tag\'s
+		     * weight if the record has already been tagged with
+		     * the tag posted.
+		     *
+		     * @access protected
+		     */
+		    protected function handleDoAdd() {
+		        if ($this->verifyRequest(\'POST\') && $this->verifyParams()) {
+		            if ($this->blnAuthenticated) {
+		                if ($intRecordId = (int) str_replace(\'.\' . $this->strFormat, \'\', $this->objUrl->getSegment(3))) {
+		                    AppLoader::includeUtility(\'Sanitizer\');
+		                    if (!($arrUnsanitary = Sanitizer::sanitizeArray($this->arrParams))) {
+		                        if (!empty($this->arrParams[\'tag\'])) {
+		                            $strTag = $this->arrParams[\'tag\'];
+		                            $objTag = $this->initModel();
+		                            
+		                            switch ($this->objUrl->getFilter(\'by\')) {
+		                                case \'blog\':
+		                                    if ($objTag->loadByBlogIdAndTag($intRecordId, $strTag) && $objTagRecord = $objTag->current()) {
+		                                        $objTagRecord->set(\'weight\', $objTagRecord->get(\'weight\') + 1);
+		                                    } else {
+		                                        $objTag->import(array(
+		                                            \'blogid\'  => $intRecordId,
+		                                            \'tag\'     => $strTag
+		                                        ));
+		                                    }
+		                                    break;
+		                                    
+		                                case \'photo\':
+		                                    if ($objTag->loadByPhotoIdAndTag($intRecordId, $strTag) && $objTagRecord = $objTag->current()) {
+		                                        $objTagRecord->set(\'weight\', $objTagRecord->get(\'weight\') + 1);
+		                                    } else {
+		                                        $objTag->import(array(
+		                                            \'photoid\' => $intRecordId,
+		                                            \'tag\'     => $strTag
+		                                        ));
+		                                    }
+		                                    break;
+		                            }
+		                        
+		                            if ($objTag->save()) {
+		                                $this->blnSuccess = true;
+		                                $this->intStatusCode = 201;
+		                            } else {
+		                                trigger_error(AppLanguage::translate(\'There was an error adding the tag\'));
+		                                $this->error();
+		                            }
+		                        } else {
+		                            trigger_error(AppLanguage::translate(\'Missing tag\'));
+		                            $this->error(400);
+		                        }
+		                    } else {
+		                        trigger_error(AppLanguage::translate(\'The following value(s) contain illegal data: %s\', implode(\', \', array_map(\'htmlentities\', $arrUnsanitary))));
+		                        $this->error(400);
+		                    }
+		                } else {
+		                    trigger_error(AppLanguage::translate(\'Missing ID\'));
+		                    $this->error(400);
+		                }
+		            } else {
+		                trigger_error(AppLanguage::translate(\'Missing or invalid authentication\'));
+		                $this->error(401);
+		            }
+		        } else {
+		            $this->error(400);
+		        }
+		    }
+		    
+		    
+		    /*****************************************/
+		    /**     FORMAT METHODS                  **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * Formats the tags into an array to be encoded.
+		     *
+		     * @access public
+		     * @param object $objTag The list of tag records to format
+		     * @param boolean $blnCount Whether to add the tag count
+		     * @return array The tags in array format
+		     */
+		    public function formatTags($objTag, $blnCount = false) {
+		        $arrTags = array();
+		        
+		        while (list(, $objTagRecord) = $objTag->each()) {
+		            $arrTag = array(
+		                \'id\'    => $objTagRecord->get(\'tagid\'),
+		                \'tag\'   => $objTagRecord->get(\'tag\'),
+		                \'abbr\'  => $objTagRecord->get(\'abbr\')
+		            );
+		            
+		            if ($blnCount) {
+		                $arrTag[\'count\'] = $objTagRecord->get(\'tally\');
+		            }
+		            
+		            $arrTags[] = $arrTag;
+		        }
+		        $objTag->rewind();
+		        
+		        return $arrTags;
+		    }
+		    
+		    
+		    /**
+		     * Formats an XML node name. This is to prevent child
+		     * nodes being named with a generic name.
+		     *
+		     * @access public
+		     * @param string $strNode The name of the node to potentially format
+		     * @param string $strParentNode The name of the parent node
+		     * @return string The formatted node name
+		     */
+		    public function getXmlNodeName($strNode, $strParentNode) {
+		        switch ($strParentNode) {
+		            case \'tags\':
+		                $strNode = substr($strParentNode, 0, -1);
+		                break;
+		        }
+		        return $strNode;
+		    }
+		    
+		    
+		    /*****************************************/
+		    /**     CACHE METHODS                   **/
+		    /*****************************************/
+		    
+		    
+		    /**
+		     * Returns the cache key consisting of the current URL
+		     * including the query string.
+		     *
+		     * @access protected
+		     * @return string The cache key
+		     */
+		    protected function getCacheKey() {
+		        return $this->objUrl->getCurrentUrl(true, false);
+		    }
+		    
+		    
+		    /**
+		     * Loads the API data from the cache. Has the option
+		     * to load from a namespace.
+		     *
+		     * @access protected
+		     * @param string $strNamespace The optional namespace to load from
+		     * @return boolean True on success
+		     */
+		    protected function loadFromCache($strNamespace = null) {
+		        $blnResult = false;
+		        if (!$this->blnNoCache) {
+		            if ($objCache = AppRegistry::get(\'Cache\', false)) {
+		                $objCache->initPresentation();
+		                if ($strNamespace) {
+		                    $arrResult = $objCache->loadNS($this->getCacheKey(), $strNamespace);
+		                } else {
+		                    $arrResult = $objCache->load($this->getCacheKey());
+		                }
+		                
+		                if ($arrResult) {
+		                    $this->blnSuccess = true;
+		                    $this->arrResult = $arrResult;
+		                    $blnResult = true;
+		                }
+		            }
+		        }
+		        return $blnResult;
+		    }
+		    
+		    
+		    /**
+		     * Saves the API data to the cache. Has the option
+		     * to save to a namespace.
+		     *
+		     * @access protected
+		     * @param integer $intExpire The expiration time in seconds, or 0 to never expire
+		     * @param string $strNamespace The optional namespace to save to
+		     * @return boolean True on success
+		     */
+		    protected function saveToCache($intExpire, $strNamespace = null) {
+		        $blnResult = true;
+		        if ($objCache = AppRegistry::get(\'Cache\', false)) {
+		            $objCache->initPresentation();
+		            if ($strNamespace) {
+		                $blnResult = $objCache->saveNS($this->getCacheKey(), $strNamespace, $this->arrResult, $intExpire);
+		            } else {
+		                $blnResult = $objCache->save($this->getCacheKey(), $this->arrResult, $intExpire);
+		            }
+		        }
+		        return $blnResult;
+		    }
+		}
+	'); ?>
+	
+	
+	<h2>Internal Example</h2>
+	<?php print Markup::formatCode('
+		AppLoader::includeUtility(\'ApiHelper\');
+		
+		//post to FooApi::handleDoEdit()
+		list($blnSuccess, $arrResult) = ApiHelper::post("/api/foo/edit/{$intId}.json", $_POST);
+		
+		//get the full result of a call to FooApi::handleBar()
+		list($blnSuccess, $arrResult) = ApiHelper::get("/api/foo/bar/{$intId}.json");
+		
+		//get a page of comments and the total number of comments altogether
+		list($arrComments, $intTotalItems) = ApiHelper::getResultNodes("/api/comments/filtered/by=userid/{$intUserId}.json?p={$intPage}&num={$intPerPage}", array(\'comments\', \'total\'), false);
+		
+		//get a single comment result node
+		$arrCommentRecord = ApiHelper::getResultNode("/api/comments/filtered/by=id/{$intCommentId}.json", \'comments\', true);
+	'); ?>
+</div>

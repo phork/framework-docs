@@ -1,0 +1,22 @@
+<div id="content">
+	<h1 class="headline">CoreAlert</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreAlert.class.php</em></div>
+	
+	<p>The CoreAlert class collects and returns alerts triggered from the various modules. In addition to the standard alerts, which persist only until the end of the request, there are also sticky alerts which persist in the session until they've been retrieved by the <strong>getAlerts()</strong> method. These are also known as flash messages.</p>
+	<p>The alerts are displayed in the alert node in <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreController/">CoreController</a>, however if that node is excluded or <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreControllerLite/">CoreControllerLite</a> is used then the alerts have to be displayed manually.</p>
+	<p>The alert class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		//trigger a standard alert
+		CoreAlert::alert(\'This is an alert\');
+		
+		//trigger a sticky alert
+		CoreAlert::alert(\'This is a sticky alert\', true);
+		
+		//retrieve the alerts
+		$arrAlerts = CoreAlert::getAlerts();
+	'); ?>
+</div>

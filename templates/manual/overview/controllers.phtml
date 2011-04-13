@@ -1,0 +1,12 @@
+<div id="content">
+	<h1 class="headline">Controllers</h1>
+	
+	<p>The controller is used to pull together all the necessary data to build the page. The <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a> determines which controller to use based on the first URL segment.</p>
+	<p>Phork comes with two core controllers (<a href="<?php echo($strBaseUrl); ?>/manual/core/CoreControllerLite/">CoreControllerLite</a> and <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreController/">CoreController</a>), as well as a a site controller for each demo site in <em>phork/sites/[sitetype]/controllers/SiteController.class.php</em> and a script controller for each demo site in <em>phork/sites/[sitetype]/controllers/ScriptController.class.php</em>.</p>
+	<p>Additionally the standard site comes with a ConcatController at <em>phork/sites/standard/controllers/ConcatController.class.php</em> for outputting minified and concatenated CSS and Javascript files in conjunction with the <a href="<?php echo($strBaseUrl); ?>/manual/utilities/ConcatHelper/">ConcatHelper</a> utility.</p>
+	<p>All the controllers must implement the Controller interface found at <em>phork/php/core/interfaces/Controller.interface.php</em>.</p>
+	<p>The main difference between the core controllers is that CoreController is used to build a page that consists of several optionally cacheable nodes (eg. header, footer, errors) whereas CoreControllerLite displays a full page.</p>
+	<p>After the controller has been instantiated, the <strong>run()</strong> method is called which sets up (or delegates to other methods to set up) all the necessary data for all pages built by the controller. Then run() calls <strong>display()</strong> which builds and displays the page.</p>
+	<p>The controllers must also contain a public <strong>error()</strong> method to handle any fatal errors.</p>
+	<p>All page output is handled by the <a href="<?php echo($strBaseUrl); ?>/manual/overview/display/">Display</a> class.</p>
+</div>

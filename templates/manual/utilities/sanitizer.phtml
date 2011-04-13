@@ -1,0 +1,14 @@
+<div id="content">
+	<h1 class="headline">Sanitizer</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Sanitizer.class.php</em></div>
+	
+	<p>The Sanitizer class is used to sanitize data from untrusted sources (eg. GET and POST). It's used in the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreModel/">CoreModel</a> class.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		$strFoo = Sanitize::sanitizeItem($_POST[\'foo\']);
+		$arrFoobar = Sanitize::sanitizeArray($arrFoobar);
+	'); ?>
+</div>

@@ -1,0 +1,42 @@
+<div id="content">
+	<h1 class="headline">CoreDebug</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreDebug.class.php</em></div>
+	
+	<p>Phork has a debugging object that can be used to help with development. The debugging object can dispatch to one or more debugging handlers that should be added to the <strong>initDebugging()</strong> method in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a>. Phork comes with 3 default handlers which can be found in <em>phork/php/ext/debug/</em>.</p>
+	<ul>
+		<li><strong>DebugLog</strong> - This logs the debugging data to a file.</li>
+		<li><strong>DebugDisplay</strong> - This displays the debugging data in the page.</li>
+		<li><strong>DebugSession</strong> - This saves the debugging data to the session for use with an AJAX popup window.</li>
+	</ul>
+	
+	<p>Each debugging handler must implement the DebugHandler interface which can be found at <em>phork/php/core/interfaces/DebugHander.interface.php</em>.</p>
+	<p>The debug class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern" rel="external">singleton</a> meaning there can only be one instance of it at a time.</p>
+	
+	<br />
+		
+	<h2>Example (from the bootstrap)</h2>
+	<?php print Markup::formatCode('
+		$objDebug = CoreDebug::getInstance();
+		
+		AppLoader::includeExtension(\'debug/\', \'DebugLog\');
+		$objDebug->addHandler(\'log\', new DebugLog(AppConfig::get(\'DebugFile\')));
+		
+		AppLoader::includeExtension(\'debug/\', \'DebugDisplay\');
+		$objDebug->addHandler(\'output\', new DebugDisplay());
+		
+		AppLoader::includeExtension(\'debug/\', \'DebugSession\');
+		$objDebug->addHandler(\'session\', new DebugSession());
+		
+		CoreDebug::debug(\'Debug me\');
+	'); ?>
+	
+	
+	<h2>Example Handler</h2>
+	<?php print Markup::formatCode('
+		class DebugDisplay implements DebugHandler {
+		    public function handle($strDebug) {
+		        echo("{$strDebug}<br />\n");
+		    }
+		}
+	'); ?>
+</div>

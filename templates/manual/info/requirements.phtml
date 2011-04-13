@@ -1,0 +1,9 @@
+<div id="content">
+	<h1 class="headline">Phork Server Requirements</h1>
+	
+	<p>In order to run Phork you'll need a server running <a href="http://www.php.net" rel="external">PHP 5</a>. PHP 4 is not supported.</p>
+	<p>Phork was developed on <a href="http://httpd.apache.org/" rel="external">Apache</a> but it has been known to run on <a href="http://www.iis.net/" rel="external">Microsoft's IIS</a>. It doesn't require <a href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html" rel="external">mod rewrite</a> (or equivalent) but it is highly recommended to use it for cleaner URLs.</p>
+	<p>You will most likely need a database unless you just plan to use Phork to route to static pages. Phork/it requires a database. Phork was written and tested using <a href="http://www.mysql.com" rel="external">MySQL</a> but can be extended to use any number of SQL databases.</p>
+	<p>Phork supports caching via one of two Memcache modules, through a Filecache module, or using a database cache. Caching is not required, but in order to support Memcache caching your server must have <a href="http://www.danga.com/memcached/" rel="external">memcached</a> installed as well as either the <a href="http://us.php.net/memcache" rel="external">PHP Memcache</a> or <a href="http://us.php.net/memcached" rel="external">PHP Memcached</a> modules.</p>
+	<p>PHP's <a href="http://us.php.net/register_globals" rel="external">register globals</a> should be turned off.</p>
+</div>

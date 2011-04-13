@@ -1,0 +1,14 @@
+<div id="content">
+	<h1 class="headline">Email</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Email.class.php</em></div>
+	
+	<p>The Email class is used to send emails with the correct headers. It can also be extended to use a third party system to send email.</p> 
+	<p>The ability to add HTML emails is coming shortly.</p>
+	
+	<br />
+	
+	<h2>Example</h2>
+	<?php print Markup::formatCode('
+		$blnResult = Email::sendTextEmail($strToEmail, $strToName, $strFromEmail, $strFromName, $strSubject, $strBody);
+	'); ?>
+</div>

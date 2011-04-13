@@ -1,0 +1,16 @@
+<div id="subnav" class="constrained cleared">
+	<div class="title">Phork Framework User Guide</div>
+	<ul>
+		<li><a href="<?php echo($strBaseUrl); ?>/docs/" rel="external">API Documentation</a></li>
+	</ul>
+	
+	<div class="pagination">
+		<?php if ($arrPrevChapter) { ?>
+		<a href="<?php echo($arrPrevChapter['Url']); ?>" class="prev">Previous Chapter: <?php echo($arrPrevChapter['Title']); ?></a>
+		<?php } ?>
+		
+		<?php if ($arrNextChapter) { ?>
+		<a href="<?php echo($arrNextChapter['Url']); ?>" class="next">Next Chapter: <?php echo($arrNextChapter['Title']); ?></a>
+		<?php } ?>
+	</div>
+</div>

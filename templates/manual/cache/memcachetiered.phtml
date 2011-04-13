@@ -1,0 +1,46 @@
+<div id="content">
+	<h1 class="headline">MemcacheTiered</h1>
+	<div id="filepath">Filepath: <em>phork/php/cache/memcache/MemcacheTiered.class.php</em></div>
+	
+	<p>The MemcacheTiered class is a caching adaptor that uses the <a href="http://us.php.net/memcache" rel="external">PHP Memcache</a> module to cache the data in <a href="http://www.danga.com/memcached/" rel="external">memcached</a>.</p>
+	<p>In addition to wrapping PHP's standard Memcache functionality this adds the ability to cache data in <a href="http://en.wikipedia.org/wiki/Namespace" rel="external">namespaces</a>. This allows you to easily flush a single namespace without having to flush the entire cache.</p>
+	<p>The <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#cache">cache configuration</a> file defines the server pool and whether or not zlib compression is turned on by default.</p>
+	
+	<br />
+	
+	<h2>Configuration Example</h2>
+	<?php print Markup::formatCode('
+		//the cache type must have a corresponding class
+		$arrConfig[\'Type\'] = \'Memcache\';
+		
+		
+		//the cache server(s) for the base tier
+		$arrConfig[\'Tiers\'][\'Base\'][\'Servers\'] = array(
+		    array(
+		        \'Host\' 		=> \'localhost\',
+		        \'Port\'		=> 11211,
+		        \'Persistent\'	=> true,
+		        \'Weight\'		=> 1,
+		        \'Timeout\'		=> 1
+		    )
+		);
+		
+		//if this is set to MEMCACHE_COMPRESSED then the data will be compressed with zlib
+		$arrConfig[\'Tiers\'][\'Base\'][\'Compressed\'] = MEMCACHE_COMPRESSED;
+		
+		
+		//the cache server(s) for the presentation tier
+		$arrConfig[\'Tiers\'][\'Presentation\'][\'Servers\'] = array(
+		    array(
+		        \'Host\' 		=> \'localhost\',
+		        \'Port\'		=> 11212,
+		        \'Persistent\'	=> true,
+		        \'Weight\'		=> 1,
+		        \'Timeout\'		=> 1
+		    )
+		);
+		
+		//if this is set to MEMCACHE_COMPRESSED then the data will be compressed with zlib
+		$arrConfig[\'Tiers\'][\'Presentation\'][\'Compressed\'] = MEMCACHE_COMPRESSED;
+	'); ?>
+</div>

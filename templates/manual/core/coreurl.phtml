@@ -1,0 +1,95 @@
+<div id="content">
+	<h1 class="headline">CoreUrl</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreUrl.class.php</em> and <em>phork/php/app/AppUrl.class.php</em></div>
+	
+	<p>The CoreUrl class parses the URL into segments and filters. It's called from the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreBootstrap/">CoreBootstrap</a> class and its most important function is being used by the bootstrap to determine the controller, and then by the controller to determine the display method.</p>
+	
+	
+	<h2>URL Segments</h2>
+	<p>The URL segments are the parts of the URL after the domain. For example if the URL is <em>http://www.example.org/foo/bar/</em> then <em>foo</em> and <em>bar</em> are the segments. See the chapter on <a href="<?php echo($strBaseUrl); ?>/manual/overview/routing/">routing</a> for more information on how these segments are used to determine the controller and how to re-route URLs to other controllers.</p>
+	
+	
+	<h2>URL Filters</h2>
+	<p>The URL filters are a hybrid between query string variables and URL segments. If any part of the URL has an equals sign in it then it will be treated as a filter rather than a segment. For example if the URL is <em>http://www.example.org/foo/bar/page=1/</em> then <em>page</em> would be considered a filter with a value of <em>1</em>.</p>
+	<p>Filters can appear anywhere in a URL and they won't affect the segments which determine the controller. Filters are not considered segments and are not available in the segments array.</p>
+	
+	
+	<h2>Forwarding</h2>
+	<p>It's possible to forward from one controller to another by explicitly setting a new URL and re-running CoreUrl's <strong>init()</strong> method followed by redetermining and changing the controller in the bootstrap. This method of forwarding has the benefit of the URL object having the new forwarded URL in it so that a call to something like <strong>getCurrentUrl()</strong> would return the forwarded URL. The other method of forwarding, which doesn't change the URL, is detailed in the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreBootstrap/">CoreBootstrap</a> chapter.</p>
+	
+	
+	<h2>Query String URLs</h2>
+	<p>If the <a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/#htaccess">mod-rewrite rule</a> uses a query string then the <strong>useQueryString()</strong> method needs to be called before <strong>init()</strong>.</p>
+		
+	<br />
+	
+	<h2>Instantiation Example (from the bootstrap)</h2>
+	<?php print Markup::formatCode('
+		//initantiate and register the URL object
+		AppRegistry::register(\'Url\', $objUrl = new AppUrl(AppConfig::get(\'BaseUrl\')));	
+		
+		//if mod rewrite uses a query string rewrite rule then parse the URL from that
+		if (AppConfig::get(\'RewriteQueryString\', false)) {
+		    $objUrl->useQueryString();
+		}
+		
+		//add the routes defined in the site config
+		$objUrl->setRoutes(AppConfig::get(\'Routes\', false));
+	'); ?>
+	
+	
+	<h2>Instantiation Example (from the ApiHelper)</h2>
+	<?php print Markup::formatCode('
+		//cloning the existing URL object will keep the existing base URL and routes
+		$objGetUrl = clone AppRegistry::get(\'Url\');
+		$objGetUrl->init(\'GET\', \'/api/foo/get.json\', array(
+		    \'num\' => 10,
+		    \'p\'   => 1
+		));
+		
+		$objPostUrl = clone AppRegistry::get(\'Url\');
+		$objPostUrl->init(\'POST\', \'/api/foo/post.json\', array(
+		    \'foo\' => 42,
+		    \'bar\' => 1
+		));
+	'); ?>
+	
+	
+	<h2>Usage Example</h2>
+	<?php print Markup::formatCode('
+		//in this example the url is http://www.example.org/foo/bar/page=1/user=phork/index.xml?num=3
+		$objUrl = AppRegistry::get(\'Url\');
+		
+		//get the first url segment which is foo
+		$strSegment = $objUrl->getSegment(0);
+		
+		//get the second url segment which is bar
+		$strSegment = $objUrl->getSegment(1);
+		
+		//get all the url segments which is an array with foo and bar
+		$arrSegments = $objUrl->getSegments();
+		
+		//get the page number which will be returned as 1
+		$intPage = $objUrl->getFilter(\'page\');
+		
+		//get all the filters which is an associative array
+		$arrFilters = $objUrl->getFilters();
+		
+		//get the file extension (eg. css, js, xml, json, etc)
+		$strExtension = $objUrl->getExtension();
+		
+		//get the num GET variable which is 3
+		$intNum = $objUrl->getVariable(\'num\');
+	'); ?>
+	
+	
+	<h2>Forwarding Example</h2>
+	<?php print Markup::formatCode('
+		//this will result in the app thinking it\'s at http://www.example.org/the/forwarded/url/
+		$objUrl = AppRegistry::get(\'Url\');
+		$objUrl->init(\'GET\', \'/the/forwarded/url/\');
+		                                            
+		$objBootstrap = AppRegistry::get(\'Bootstrap\');
+		$objBootstrap->changeController($objBootstrap->determineController());
+	'); ?>
+</div>

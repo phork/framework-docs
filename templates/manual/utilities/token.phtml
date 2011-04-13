@@ -1,0 +1,44 @@
+<div id="content">
+	<h1 class="headline">Token</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/Token.class.php</em></div>
+	
+	<p>The Token class is used to set and check a form token to verify that the a form post isn't being spoofed. It requires $arrConfig['TokenField'] and $arrConfig['TokenSessionName'] to be defined in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#site">site configuration</a> file to store the hidden form field name and the session variable name respectively. A secondary benefit of the Token class is that it stops a user from reloading a posted form and re-posting the data if the token isn't revived.</p>
+	<p>In order to verify a form post there must be a hidden field containing a token that's also stored in the user's session. When the form has been submitted the posted field is matched with the tokens in the session. If a match is found the post is considered valid.</p>
+	<p>The <a href="<?php echo($strBaseUrl); ?>/manual/hooks/CommonHooks/">CommonHooks</a> class includes a <strong>verifyToken()</strong> method that automatically verifies the token anytime there is $_POST data. Alternately the verification can be done manually on a case by case basis.</p>
+	
+	<br />
+	
+	<h2>Form Example</h2>
+	<?php print Markup::formatCode('
+		<form method="post">
+		    <?php echo(Form::getHidden(AppConfig::get(\'TokenField\'), Token::initToken())); ?>
+		    ...
+		</form>
+	'); ?>
+	
+	
+	<h2>Verification Example</h2>
+	<?php print Markup::formatCode('
+		//if the verification fails display a fatal error
+		if (!empty($_POST) && !Token::verifyRequest()) {
+		    AppRegistry::get(\'Bootstrap\')->fatal();
+		}
+	'); ?>
+	
+	
+	<h2>Hooks Example</h2>
+	<?php print Markup::formatCode('
+		//instantiate the common hooks object
+		$objCommonHooks = new CommonHooks();
+	
+		//add the hook to always verify the form post
+		$objBootstrap->registerPreDispatchHook(array($objCommonHooks, \'verifyToken\'));
+	'); ?>
+	
+	
+	<h2>Reviving a Token</h2>
+	<?php print Markup::formatCode('
+		//revive the current token so it can be used again
+		Token::reviveToken();
+	'); ?>
+</div>

@@ -1,0 +1,69 @@
+<div id="content">
+	<h1 class="headline">Application Flow</h1>
+	<ul>
+		<li>paths.php (optional)
+			<ul>
+				<li>set site directory path</li>
+				<li>set install directory path</li>
+				<li>set site type (eg. dev, stage, live, etc)</li>
+			</ul>
+		</li>
+	</ul>
+	
+	<ul>
+		<li>index.php
+			<ul>
+				<li>set any paths not set by paths.php</li>
+				<li>add the install path to the include path</li>
+				<li>include any application class overrides (eg. AppLoader)</li>
+				<li>include the bootstrap</li>
+				<li>initialize the bootstrap
+					<ul>
+						<li>load the configuration files</li>
+						<li>load any language files</li>
+						<li>load the libraries (cache, database)</li>
+						<li>register the error handler</li>
+						<li>initialize debugging</li>
+						<li>parse the URL</li>
+						<li>start the session</li>
+					</ul>
+				</li>
+				<li>register the bootstrap</li>
+				<li>run the bootstrap
+					<ul>
+						<li>initialize any hooks</li>
+						<li>run any 'bootstrap.pre-run' events</li>
+						<li>determine the controller based on the URL and any optional routing overrides</li>
+						<li>run any 'bootstrap.pre-init' events</li>
+						<li>initialize the controller
+							<ul>
+								<li>turn out output buffering via the display object (optional)</li>
+							</ul>
+						</li>	
+						<li>run any 'bootstrap.post-init' events</li>
+						<li>run the controller
+							<ul>
+								<li>determine the controller's display method based on the URL</li>
+								<li>call the display method to build the page
+									<ul>
+										<li>add one or more nodes to the display object</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+						<li>run any 'bootstrap.post-run' events</li>
+					</ul>
+				</li>
+				<li>display the page
+					<ul>
+						<li>run any 'display.pre-headers' events</li>
+						<li>send headers</li>
+						<li>build the page from the node(s)</li>
+						<li>run any 'display.pre-output' events</li>
+						<li>print the output</li>
+					</ul>
+				</li>
+			</ul>
+		</li>
+	</ul>
+</div>

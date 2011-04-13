@@ -1,0 +1,32 @@
+<div id="content">
+	<h1 class="headline">CacheHooks</h1>
+	<div id="filepath">Filepath: <em>phork/php/hooks/CacheHooks.class.php</em></div>
+	
+	<p>The CacheHooks class is collection of <a href="<?php echo($strBaseUrl); ?>/manual/overview/hooks/">hooks</a> to serve and save page caches. It's called from the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrap/">bootstrap</a>.</p>
+	<p>In order for pages to be cached, the output buffer must be turned on in the <a href="<?php echo($strBaseUrl); ?>/manual/overview/display/">display object</a>. The URLs to cache should be defined as regular expression patterns in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#site">site configuration</a> files. This caches complete pages, so if any part of the page contains a username or any data that changes on a per-user basis either this shouldn't be used, or the namespace should be used. In cases like that it's possible to cache page nodes using the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreController/">CoreController</a> class.</p>
+	<p>This requires a caching object in the registry with the name <em>Cache</em>.</p>
+	
+	<br />
+	
+	<h2>Site Config Example</h2>
+	<?php print Markup::formatCode('
+		//cache all pages of the manual for 300 seconds
+		$arrConfig[\'CacheUrls\'] = array(
+		    \'|(/manual/[^/]+/[^/]+/)|\' => array(
+		        \'Namespace\'	=> null,
+		        \'Expire\'	=> 300
+		    )
+		);
+	'); ?>
+	
+	
+	<h2>Usage Example (from the bootstrap)</h2>
+	<?php print Markup::formatCode('
+		//add the hooks to handle full page caching			
+		if (AppLoader::includeHooks(\'CacheHooks\')) {
+		    $objCacheHooks = new CacheHooks();
+		    $this->registerPreRunHook(array($objCacheHooks, \'serveCache\'));
+		    $this->registerPostRunHook(array($objCacheHooks, \'saveCache\'));
+		}
+	'); ?>
+</div>

@@ -1,0 +1,28 @@
+<div id="content">
+	<h1 class="headline">Best Practices</h1>
+	
+	<p>Please note that the core files are in <em>phork/php/core/</em>, and these should never be altered. If any core changes are necessary there are application extensions in <em>phork/php/app/</em> which can be used.</p>
+	<p>The following app files are included from the CoreBootstrap:</p>
+	
+	<?php print Markup::formatCode('
+		class_exists(\'AppConfig\', false) || require(\'php/app/AppConfig.class.php\');
+		class_exists(\'AppDisplay\', false) || require(\'php/app/AppDisplay.class.php\');
+		class_exists(\'AppEvent\', false) || require(\'php/app/AppEvent.class.php\');
+		class_exists(\'AppLanguage\', false) || require(\'php/app/AppLanguage.class.php\');
+		class_exists(\'AppLoader\', false) || require(\'php/app/AppLoader.class.php\');
+		class_exists(\'AppRegistry\', false) || require(\'php/app/AppRegistry.class.php\');
+		class_exists(\'AppUrl\', false) || require(\'php/app/AppUrl.class.php\');
+	'); ?>
+	
+	
+	<h2 id="app">Site-Specific App Files</h2>
+	<p>In the event that you need different app files for each site you should manually include the site-specific app files in the <a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/#front">front controller</a> before the bootstrap is included. They should be named the same as the app files in the <em>phork/php/app/</em> directory. This way the class_exists() check in the CoreBootstrap will find them and they won't be included from the default location.</p>
+	
+	<?php print Markup::formatCode('
+		//include the app loader override class
+		require_once("{$strSiteDir}app/AppLoader.class.php");
+		
+		//include the bootstrap class
+		require_once("{$strSiteDir}bootstraps/SiteBootstrap.class.php");
+	'); ?>
+</div>

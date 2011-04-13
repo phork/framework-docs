@@ -1,0 +1,21 @@
+<div id="content">
+	<h1 class="headline">Phork Manual Introduction</h1>
+	
+	<p><strong>Phork is a flexible, open source PHP 5 framework</strong> that provides a solid foundation for developing robust applications. Phork is an object oriented MVC (Model View Controller) framework and includes an Active Record ORM with automatic relationship loading, as well as the ability to register events to run before and after loading, saving and deleting records. Phork also includes an API framework, URL routing, page caching, template caching, a flexible debugging system, model scaffolding, optional language translations, and several useful utilities and extensions.</p>
+	<p><strong>Phork/it is a starter kit for building websites</strong> on top of the Phork Framework. It includes both front end and back end enhancements to the core set of functionality provided by Phork. It's an excellent starting point for both new and experienced users who don't want to reinvent the wheel when it comes to setting up the basic building blocks of a website. Phork/it includes user registration, Twitter and Facebook integration, event streams, a REST API, and much more.</p>
+	<p>This manual will help you decide whether Phork and Phork/it are right for you, and how best to use them to build your site.</p>
+	
+	<h2>API Documentation</h2>
+	<p>In addition to this manual, Phork has a complete set of <a href="<?php echo($strBaseUrl); ?>/docs/" rel="external">API Documentation</a> generated from its <a href="http://en.wikipedia.org/wiki/PHPDoc" rel="external">PHPDoc</a> comments.</p>
+	
+	<h2>Quick Start</h2>
+	<a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/" class="h2alt">Advanced Installation</a>
+	<ol>
+		<li><a href="http://github.com/phork/phork" rel="external">Download</a> and install the Phork package.</li>
+		<li>Determine whether you want to start with Phork's <em>standard</em> or <em>lite</em> base (<a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/#sitetype">Standard vs. Lite</a>), or if you want to use <a href="<?php echo($strPhorkitUrl); ?>" rel="external">Phork/it</a>.</li>
+		<li>Recursively copy either <em>phork/sites/lite/</em>, <em>phork/sites/standard/</em> or the Phork/it project to <em>phork/sites/public/</em>.</li>
+		<li>Copy the example configuration files from <em>phork/sites/public/config/example/</em> to <em>phork/sites/public/config/live/</em>.</li>
+		<li>Edit the configuration files in <em>phork/sites/public/config/live/</em> starting with site.config.php and global.config.php.</li>
+		<li>Point your server's document root to <em>/path/to/phork/sites/public/htdocs/</em>.</li>
+	</ol>
+</div>

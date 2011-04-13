@@ -1,0 +1,8 @@
+<div id="content">
+	<h1 class="headline">CacheTier</h1>
+	<div id="filepath">Filepath: <em>phork/php/cache/CacheTier.class.php</em></div>
+	
+	<p>The CacheTier class stores the cache server variables if using Memcache, the cache filesystem variables if using Filecache, or the database connection variables if using Dbcache, as well as a flag to determine if the connection is open, and the cache object returned from the connection function.</p>
+	<p>By default there's a base and presentation tier, as well as any others that have been defined in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#cache">cache configuration</a>.</p>
+	<p>The tier objects are instantiated in the <a href="<?php echo($strBaseUrl); ?>/manual/cache/CacheFactory/">CacheFactory</a> and stored in the <a href="<?php echo($strBaseUrl); ?>/manual/cache/MemcacheTiered/">MemcacheTiered</a>, <a href="<?php echo($strBaseUrl); ?>/manual/cache/FilecacheTiered/">FilecacheTiered</a> or <a href="<?php echo($strBaseUrl); ?>/manual/cache/DbcacheTiered/">DbcacheTiered</a> object.</p>
+</div>

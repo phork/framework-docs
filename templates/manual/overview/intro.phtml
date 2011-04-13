@@ -1,0 +1,93 @@
+<div id="content">
+	<h1 class="headline">Introduction</h1>
+
+	<p>Phork is a <a href="http://en.wikipedia.org/wiki/Model-view-controller" rel="external">Model-View-Controller</a> (or MVC) framework meaning there's a separation between the logic and the presentation. The most basic Phork installation will be used to map each URL to a <a href="<?php echo($strBaseUrl); ?>/manual/overview/controllers/">controller</a>.</p> 
+	
+	
+	<h2>Application Flow</h2>
+	<p>The main site file, also known as the front controller, is <em>phork/sites/[sitetype]/htdocs/index.php</em>. All parts of the site should be routed through this file. It's possible to rename index.php to something else. More details can be found in the <a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/#renaming">installation instructions</a>.</p>
+	<p>The standard setup is for the front controller to determine the various directory paths and the type of server configuration to use (dev, live, etc). All of these are automatically determined by the front controller's file path by default. If your application is using a non-standard setup then these lines will need to be altered accordingly. More details can be found in the <a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/#front">installation instructions</a>.</p>
+	<p>After Phork has determined the server type and the paths it calls <a href="http://us.php.net/set_include_path" rel="external">set_include_path()</a> to add the base Phork directory.
+	<p>The next step is to instantiate, <a href="<?php echo($strBaseUrl); ?>/manual/cms/registry/">register</a>, and run the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrapping/">bootstrap</a> which will run any <a href="<?php echo($strBaseUrl); ?>/manual/overview/hooks/">hooks</a> and hand off processing to a controller.</p>
+	<p>If any part of the output needs altering after the page has been generated (eg. the load time) then you can manually alter the <a href="<?php echo($strBaseUrl); ?>/manual/overview/display/">display</a>.</p>
+	
+	<br />
+	
+	<h2>Example index.php</h2>
+	<?php print Markup::formatCode('
+		<?php
+		    //set the error reporting level (must always include E_USER errors)
+		    error_reporting(E_ALL | E_STRICT);
+		    
+		    
+		    /*****************************************/
+		    /**     PATHS                           **/
+		    /*****************************************/
+		    
+		    
+		    //the path to the directory containing the site files (eg. /path/to/phork/sites/lite/)
+		    if (empty($strSiteDir)) {
+		        $strSiteDir = dirname(dirname(__FILE__)) . \'/\';
+		    }
+		    
+		    //the path to the directory containing the site config files (eg. /path/to/phork/sites/lite/config/live/)
+		    if (empty($strConfigDir)) {
+		        if (empty($strConfigType)) {
+		            $strConfigType = \'live\';
+		        }
+		        $strConfigDir = "{$strSiteDir}config/{$strConfigType}/";
+		    }
+		    
+		    //the path to the directory containing the phork package (eg. /path/to/phork/)
+		    if (empty($strInstallDir)) {
+		        $strInstallDir = dirname(dirname($strSiteDir)) . \'/\';
+		    }
+		    
+		    //add the phork directory to the include path
+		    set_include_path(implode(PATH_SEPARATOR, array(
+		        $strInstallDir
+		    )) . PATH_SEPARATOR . get_include_path());
+		    
+		    
+		    /*****************************************/
+		    /**     BOOTSTRAP                       **/
+		    /*****************************************/
+		    
+		   
+		    //include the app loader override class
+		    require_once("{$strSiteDir}app/AppLoader.class.php");  
+		    
+		    //include the bootstrap class
+		    require_once("{$strSiteDir}bootstraps/SiteBootstrap.class.php");
+		    
+		    //register and run the bootstrap to build the page
+		    try { 
+		        $objBootstrap = new SiteBootstrap(array(
+		            \'strInstallDir\'     => $strInstallDir,
+		            \'strSiteDir\'        => $strSiteDir,
+		            \'strConfigDir\'      => $strConfigDir
+		        ));
+		        AppRegistry::register(\'Bootstrap\', $objBootstrap);
+		        $objBootstrap->run();    
+		    }
+		        
+		    //handle core exceptions by showing details or a generic error
+		    catch (CoreException $objException) {
+		        if (AppConfig::get(\'ErrorVerbose\')) {
+		            $objException->handleException();
+		        } else {
+		            $objException->flushBuffer();
+		            if ($objError = AppRegistry::get(\'Error\', false)) {
+		                $arrErrors = $objError->flushErrors();
+		            }
+		            require(AppConfig::get(\'TemplateDir\') . \'system/error.phtml\');
+		        }
+		    }
+		    
+		    //handle any other exceptions with a generic message
+		    catch (Exception $objException) {
+		        print \'There was a fatal error\';
+		    }
+		?>
+	'); ?>
+</div>

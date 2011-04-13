@@ -1,0 +1,45 @@
+<div id="content">
+	<h1 class="headline">ApiHelper</h1>
+	<div id="filepath">Filepath: <em>phork/php/utilities/ApiHelper.class.php</em></div>
+	
+	<p>The ApiHelper class is used to called your application's REST API methods internally without incurring the additional overhead of multiple HTTP requests. It does so by backing up the actual request method and request variables and then by temporarily faking them for the duration of the API call. Then instead of using the ApiController to make the call it calls the FooApi methods directly.</p>
+	<p>Each request can either return an array containing the success flag, the result array and the status code, or can be wrapped in a method to just return part of the result data.</p>
+	<p>Any API method called using the ApiHelper class can take advantage of an additional internal flag which can be used by the API methods to allow for such things as more permissive actions or to return additional data.</p>
+	<p><em>The ApiHelper has the option to work with the <a href="<?php echo($strBaseUrl); ?>/manual/utilities/UserLogin/">UserLogin</a> object in the registry to authenticate users, although it's not required. This is a Phork/it object.</em></p>
+	
+	<br />
+	
+	<h2>GET Example</h2>
+	<?php print Markup::formatCode('
+		list($blnSuccess, $arrEvents, $intStatusCode) = ApiHelper::get(\'/api/events/filter/by=userid/\' . $intUserId . \'.json\');
+	'); ?>
+	
+	
+	<h2>POST Example</h2>
+	<?php print Markup::formatCode('
+		list($blnSuccess, $arrResult, $intStatusCode) = ApiHelper::post(\'/api/events/add/status.json\', array(
+		    \'status\' => \'My ceiling is leaking\'
+		));
+	'); ?>
+	
+	
+	<h2>PUT Example</h2>
+	<?php print Markup::formatCode('
+		list($blnSuccess, $arrResult, $intStatusCode) = ApiHelper::put(\'/api/users/connect/friend/\' . $strUsername . \'.json\');
+	'); ?>
+	
+	
+	<h2>DELETE Example</h2>
+	<?php print Markup::formatCode('
+		list($blnSuccess, $arrResult, $intStatusCode) = ApiHelper::delete(\'/api/events/delete/\' . $intEventId . \'.json\');
+	'); ?>
+	
+	
+	<h2>Node Example</h2>
+	<?php print Markup::formatCode('
+		//retrieve only the first child node within the users node
+		if ($arrUserRecord = ApiHelper::getResultNode(\'/api/users/filter/by=username/\' . $strUsername . \'.json", \'users\', true)) {
+		    print_r($arrUserRecord);
+		}
+	'); ?>
+</div>

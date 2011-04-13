@@ -1,0 +1,14 @@
+<div id="content">
+	<h1 class="headline">Scripts</h1>
+	
+	<p>Phork is set up to allow <a href="http://www.php.net/features.commandline" rel="external">PHP command line scripts</a> to be run. The scripts are all routed through <em>phork/sites/[sitetype]/scripts/index.php</em> front controller which is set up very similar to the sites' index.php files. Because scripts can't rely on server variables, the config type (dev, live, etc) can't be determined from the host name so it needs to be explicitly passed to the script at run time.</p>	
+	
+	
+	<h2>Running Scripts</h2>
+	<p>Scripts should be passed arguments similar to the URL segments. The first argument is the server type, the second argument is the name of the controller, the third argument is the display method in that controller, and the rest of the arguments are available in the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreUrl/">CoreUrl</a> object. Scripts are <a href="<?php echo($strBaseUrl); ?>/manual/overview/routing/">routed</a> just the same as the sites are.</p>
+	<p>In this example the processing would be dispatched to MyScriptController::run() which would load the <em>live</em> configuration files and would call displayFoo().</p>
+	
+	<?php print Markup::formatCode('
+		/usr/bin/php /path/to/phork/sites/public/scripts/index.php live MyScript foo bar
+	'); ?>
+</div>

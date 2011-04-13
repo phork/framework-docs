@@ -1,0 +1,64 @@
+<div id="content">
+	<h1 class="headline">Routing</h1>
+	
+	<p>The standard routing uses the parsed URL data in the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreUrl/">CoreUrl</a> object to determine the controller to use from the first URL segment and the method in that controller from the second segment.</p>
+	<p>For example if the URL were <em>http://www.example.org/foo/bar/</em> then the controller would be FooController and the method would be <strong>displayBar()</strong>. If there is no second segment then the <strong>displayIndex()</strong> method is called. If there are no segments at all then the default controller defined in the boostrap is used with the <strong>displayIndex()</strong> method.</p>
+	<p>Routing allows you to re-route a URL to use a controller and method that break from this standard. The routing overrides are set in the <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/#site">site configuration</a> file.</p>
+	<p>Routing rules can use <a href="http://us.php.net/manual/en/book.pcre.php" rel="external">regular expressions</a> and backreferences (eg. $1) are automatically replaced.</p>
+	
+	<br />
+	
+	<h2>Routing Example</h2>
+	<?php print Markup::formatCode('
+		//route http://www.example.org/foo/bar/ to DemoController and displayBaz()
+		$arrConfig[\'Routes\'][\'^/foo/bar/$\'] = \'/demo/baz/\';
+		
+		//route http://www.example.org/foo/[segment]/ to DemoController display[Segment]
+		$arrConfig[\'Routes\'][\'^/foo/([^/]+)/$\'] = \'/demo/$1/\';
+		
+		//route the miscellaneous footer pages to MiscController display[Segment]
+		$arrConfig[\'Routes\'][\'^/(about|help|contact|terms|privacy)/?$\'] = \'/misc/$1/\';
+		
+		//route the index to SiteController displaySplash()
+		$arrConfig[\'Routes\'][\'^/?$\'] = \'/site/splash/\';
+	'); ?>
+	
+	<br />
+	
+	<h2>Minified URL Routing</h2>
+	<p>Sometimes your URLs will contain a string in them for SEO purposes. For example, <em>http://example.org/blogs/42/i-miss-arrested-development/</em> where <em>42</em> is the blog ID and <em>i-miss-arrested-development</em> is the blog title converted into a format suitable for a URL. You could minify this URL to <em>http://example.org/b/42/</em> and route it through a redirect method that looks up the title and then sends a 301 permanent redirect header.</p>
+	
+	<?php print Markup::formatCode('
+		//route the minified URLs through a redirect controller
+		$arrConfig[\'Routes\'][\'^/b/([0-9]+)/?$\'] = \'/site/redirect/type=blog/id=$1/\';
+	'); ?>
+	
+	<p>This is an example of a redirect method that would go in SiteController.class.php. It could also use the <a href="<?php echo($strBaseUrl); ?>/manual/hooks/CacheHooks/">CacheHooks</a> class to cache the redirect header.</p>
+	<?php print Markup::formatCode('
+		protected function displayRedirect() {
+		    $objUrl = AppRegistry::get(\'Url\');
+		    switch ($objUrl->getFilter(\'type\')) {
+		        case \'blog\':
+		            if ($intBlogId = $objUrl->getFilter(\'id\')) {
+		                AppLoader::includeModel(\'BlogModel\');
+		                $objBlog = new BlogModel();
+		                if ($objBlog->loadById($intBlogId) && $objBlogRecord = $objBlog->first()) {
+		                    $strLocation = sprintf(\'/%s/blogs/%d/%s/\', $objUrl->getBaseUrl(), $intBlogId, $objBlogRecord->get(\'urlkey\'));
+		                }
+		            }
+	                
+		        default:
+		            trigger_error(AppLanguage::translate(\'Invalid redirect type\'));
+		            break;
+		    }
+		    
+		    if (isset($strLocation)) {
+		        $objDisplay = AppDisplay::getInstance();
+		        $objDisplay->setStatusCode(301);
+		        $objDisplay->appendHeader(\'location: \' . $strLocation);
+		    } else {
+		        $this->error(404);
+		    }
+		}
+	'); ?>
+</div>

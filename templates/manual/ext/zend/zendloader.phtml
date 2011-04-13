@@ -1,0 +1,25 @@
+<div id="content">
+	<h1 class="headline">ZendLoader</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/zend/ZendLoader.class.php</em></div>
+	
+	<p>The ZendLoader class is a small wrapper for loading components from the <a href="http://framework.zend.com/" rel="external">Zend Framework</a>. It requires a <a href="<?php echo($strBaseUrl); ?>/manual/install/configuration/">configuration file</a> named <em>zend.config.php</em> which defines where the Zend Framework is installed. The standard location is <em>phork/php/ext/zend/Zend/</em>.</p>
+	
+	<br />
+	
+	<h2>Example Usage</h2>	
+	<?php print Markup::formatCode('
+		//include the zend loader
+		AppLoader::includeClass(\'php/ext/zend/\', \'ZendLoader\');
+		
+		//include and instantiate the zend rest client
+		ZendLoader::includeClass(\'Zend_Rest_Client\');
+		$objRest = new Zend_Rest_Client();
+	 '); ?>
+	 
+	 
+	<h2>Example Config</h2>	
+	<?php print Markup::formatCode('
+		//sets the absolute path to the Zend core
+		$arrConfig[\'ZendBase\'] = AppConfig::get(\'InstallDir\') . \'php/ext/zend\';
+	'); ?>
+</div>

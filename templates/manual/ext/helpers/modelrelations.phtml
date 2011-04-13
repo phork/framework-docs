@@ -1,0 +1,73 @@
+<div id="content">
+	<h1 class="headline">ModelRelations</h1>
+	<div id="filepath">Filepath: <em>phork/php/ext/helpers/ModelRelations.class.php</em></div>
+	
+	<p>The ModelRelations class is an extension of the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreModelHelper/">CoreModelHelper</a> class that's used to load sets of pre-defined related data. For example if a user has many blogs it can load either all of them or a subset of them. Or if a user has one image associated with them it can load that.</p>
+	<p>The relations helper has a <strong>loadAutoLoad</strong> event method to load only the relations with the AutoLoad flag set to true, a <strong>loadAll</strong> event method to load all the defined relations, and a <strong>loadSpecific</strong> event method to only load specific relations. The latter 2 methods disregard the auto load flag. Additionally the relations can be loaded recursively but after the first level only the auto load relations are loaded.</p>
+	<p>Generally this helper should be appended in the model's constructor along with the relationship definitions.</p>
+	
+	<br />
+	
+	<h2>Example (from a model constructor)</h2>
+	<?php print Markup::formatCode('
+		if (AppLoader::includeExtension(\'helpers/\', \'ModelRelations\')) {
+		    $this->appendHelper(\'relations\', \'ModelRelations\', array(
+		    
+		        //the options here are HasMany, HasOne, BelongsToMany and BelongsToOne
+		        \'HasMany\'         => array(
+		            \'Blogs\'          => array(
+		                \'LoadAs\'        => \'blogs\',
+		                \'AutoLoad\'      => false,
+		                \'ClassName\'     => \'BlogModel\',
+		                \'Dependent\'     => true,
+		                \'Conditions\'    => array(
+		                    array(
+		                        \'Column\'      => \'userid\',
+		                        \'Property\'    => $this->strPrimaryKey,
+		                        \'Operator\'    => \'=\'
+		                    )
+		                ),
+		                \'Order\'         => array(
+		                    array(
+		                        \'Column\'      => \'published\',
+		                        \'Sort\'        => \'desc\'
+		                    )
+		                ),
+		                \'Config\'        => array(
+		                    \'NoUserJoin\'      => true
+		                )
+		            ),
+		        )
+		    ));
+		    
+		    //initialize the relations if the auto load flag was set in the config, also set up the optional recursion level
+		    if (!empty($arrConfig[\'RelationsAutoLoad\'])) {
+		        $this->initHelper(\'relations\', array(\'loadAutoLoad\'), array(
+		            \'Recursion\' => isset($arrConfig[\'RelationsRecursion\']) ? $arrConfig[\'RelationsRecursion\'] : 0
+		        ));
+		    }
+		}
+    '); ?>
+	
+	
+	<h2>Run Time Example</h2>
+	<?php print Markup::formatCode('
+		//set up the relations in the user model but don\'t pass RelationsAutoLoad to initialize it
+		$objUser = new UserModel(array(
+		    \'Relations\' => true
+		));
+		
+		//initialize the relation to load the user\'s roles and blogs
+		$objUser->initHelper(\'relations\', array(\'loadSpecific\'), array(
+		    \'Relations\' => array(\'HasMany.Role\', \'HasMany.Blogs\')
+		));
+		
+		//load the user and the relationships
+		if ($objUser->loadById(1) && $objUser->loadById(1)->first()) {
+		    //do something here
+		}
+		
+		//remove the helper but don\'t destroy it, this way it can be reinitialized
+		$objUser->removeHelper(\'relations\');
+	'); ?>
+</div>

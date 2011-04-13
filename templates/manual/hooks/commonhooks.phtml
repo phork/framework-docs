@@ -1,0 +1,20 @@
+<div id="content">
+	<h1 class="headline">CommonHooks</h1>
+	<div id="filepath">Filepath: <em>phork/php/hooks/CommonHooks.class.php</em></div>
+	
+	<p>The CommonHooks class contains a collection of <a href="<?php echo($strBaseUrl); ?>/manual/overview/hooks/">hooks</a> available to all the application. It's called from the <a href="<?php echo($strBaseUrl); ?>/manual/overview/bootstrap/">bootstrap</a>.</p>
+	<p>The <strong>verifyToken()</strong> hook is used in conjunction with the <a href="<?php echo($strBaseUrl); ?>/manual/utilities/Token/">Token</a> utility to verify form posts and displays a fatal error page if the post doesn't verify.</p>
+	<p>The <strong>trackHistory()</strong> hook is used to track the last page(s) that the user visited. Certain file extensions such as <em>.css</em>, <em>.js</em>, <em>.xml</em> and <em>json</em> can be excluded. It's useful when redirecting a user back to a previous page.</p>
+	
+	<br />
+	
+	<h2>Example (from the bootstrap)</h2>
+	<?php print Markup::formatCode('
+		//the the hooks to verify the form posts and track URL history
+		if (AppLoader::includeHooks(\'CommonHooks\')) {
+		    $objCommonHooks = new CommonHooks();
+		    $objBootstrap->registerPreRunHook(array($objCommonHooks, \'verifyToken\'));
+		    $objBootstrap->registerPostRunHook(array($objCommonHooks, \'trackHistory\'), array(5, array(\'css\', \'js\', \'xml\', \'json\', \'jsonp\')));
+		}
+	'); ?>
+</div>

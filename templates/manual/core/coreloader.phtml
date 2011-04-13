@@ -1,0 +1,108 @@
+<div id="content">
+	<h1 class="headline">CoreLoader</h1>
+	<div id="filepath">Filepath: <em>phork/php/core/CoreLoader.class.php</em> and <em>phork/php/app/AppLoader.class.php</em></div>
+	
+	<p>The CoreLoader class is used to include the various other classes that make up the application, and optionally to instantiate an object from an included class. There are several wrapper classes to include the most common class types. They are <strong>includeController()</strong>, <strong>includeModel()</strong>, <strong>includeApi()</strong>, <strong>includeHooks()</strong>, <strong>includeExtension</strong>, and <strong>includeUtility()</strong>.</p>
+	<p>The loader checks for the file in all the include paths set by <strong>set_include_path()</strong> in the <a href="<?php echo($strBaseUrl); ?>/manual/install/instructions/">front controller</a>.</p>
+	
+	<br />
+	
+	<h2>Example Usage</h2>
+	<?php print Markup::formatCode('
+		//get the full include path to the public templates
+		AppLoader::getIncludePath(\'sites/public/templates/\');
+
+		//include the database factory from the database directory
+		AppLoader::includeClass(\'php/database/\', \'DatabaseFactory\');
+
+		//include the site controller
+		AppLoader::includeController(\'SiteController\');
+		
+		//include the user model
+		AppLoader::includeModel(\'UserModel\');
+		
+		//include the common hooks
+		AppLoader::includeHooks(\'CommonHooks\');
+		
+		//include the debug log extension class
+		AppLoader::includeExtension(\'debug/\', \'DebugLog\');
+		
+		//include the token utility class
+		AppLoader::includeUtility(\'Token\');
+		
+		//include and instantiate the file system object
+		$objFileSystem = AppLoader::newObject(\'php/ext/files/\', AppConfig::get(\'FileSystem\') . \'FileSystem\');
+	'); ?>
+	
+	
+	<h2>Example Extension</h2>
+	<?php print Markup::formatCode('
+		class AppLoader extends CoreLoader {
+		
+		    /**
+		     * Includes a model class. This first checks the site-specific
+		     * directory and then the admin site directory.
+		     *
+		     * @access public
+		     * @param string $strClass The model class name
+		     * @return boolean True on success
+		     * @static
+		     */
+		    static public function includeModel($strClass) {
+		        return self::getInstance()->includeClass(AppConfig::get(\'SiteDir\') . \'models/\', $strClass, false) ||
+		               self::getInstance()->includeClass(AppConfig::get(\'AdminDir\') . \'models/\', $strClass);
+		    }
+		    
+		    
+		    /**
+		     * Includes a hook class. This first checks the global
+		     * directory, then the site-specific directory and then
+		     * the admin directory.
+		     *
+		     * @access public
+		     * @param string $strClass The hook class name
+		     * @return boolean True on success
+		     * @static
+		     */
+		    static public function includeHooks($strClass) {
+		        return self::getInstance()->includeClass(AppConfig::get(\'InstallDir\') . \'php/hooks/\', $strClass, false) ||
+		               self::getInstance()->includeClass(AppConfig::get(\'SiteDir\') . \'hooks/\', $strClass, false) ||
+		               self::getInstance()->includeClass(AppConfig::get(\'AdminDir\') . \'hooks/\', $strClass);
+		    }
+		    
+		    
+		    /**
+		     * Includes an extension class or file. This first checks
+		     * the global directory, then the site-specific directory.
+		     *
+		     * @access public
+		     * @param string $strExtension The extension sub-directory
+		     * @param string $strClass The extension class name
+		     * @param boolean $blnFile Whether to use the file include method
+		     * @return boolean True on success
+		     * @static
+		     */
+		    static public function includeExtension($strExtensionDir, $strClass, $blnFile = false) {
+		        $strMethod = $blnFile ? \'includeFile\' : \'includeClass\';
+		        return self::getInstance()->$strMethod(AppConfig::get(\'InstallDir\') . \'php/ext/\' . $strExtensionDir, $strClass, false) ||
+		               self::getInstance()->$strMethod(AppConfig::get(\'SiteDir\') . \'ext/\' . $strExtensionDir, $strClass);
+		    }
+		    
+		    
+		    /**
+		     * Includes a utility class. This first checks the site-specific
+		     * directory, then the global directory, then the admin site.
+		     *
+		     * @access public
+		     * @param string $strClass The utility class name
+		     * @return boolean True on success
+		     * @static
+		     */
+		    static public function includeUtility($strClass) {
+		        return self::getInstance()->includeClass(AppConfig::get(\'SiteDir\') . \'utilities/\', $strClass, false) ||
+		               self::getInstance()->includeClass(AppConfig::get(\'InstallDir\') . \'php/utilities/\', $strClass, false) ||
+		               self::getInstance()->includeClass(AppConfig::get(\'AdminDir\') . \'utilities/\', $strClass);
+		    }
+		}
+	'); ?>
+</div>

@@ -1,0 +1,12 @@
+<div id="content">
+	<h1 class="headline">Models</h1>
+	
+	<p>The models are used to work with data (usually from a database) and to gather, validate and save the data. They're generally stored in <em>phork/sites/[sitetype]/models/</em>, and included with <strong>AppLoader::includeModel()</strong>.</p>
+	<p>Each model contains an <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreIterator/">iterator object</a> that stores a set of <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreRecord/">CoreRecord</a> objects (or extensions thereof). They can also contain zero or more <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreModelHelper/">CoreModelHelper</a> objects to assist with things like validation and loading related data (also known as relations).</p>
+	<p>Phork comes with 3 pre-built core model classes.</p>
+	<ul>
+		<li>The <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreModel/">CoreModel</a> class is an abstract class that most models should extend. It sets up the <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreIterator/">iterator object</a>, includes the record class, and contains all the function to set up the helpers.</li>
+		<li>The <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDatabaseModel/">CoreDatabaseModel</a> class extends CoreModel and is used to load, add, edit, and delete records in the database.</li>
+		<li>The <a href="<?php echo($strBaseUrl); ?>/manual/core/CoreDatabaseScaffoldModel/">CoreDatabaseScaffoldModel</a> class extends CoreDatabaseModel and builds a model based on the database table definitions.</li>
+	</ul>
+</div>
