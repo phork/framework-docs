@@ -42,6 +42,7 @@
 			parent::__construct();
 			
 			$this->assignPageVar('strBaseUrl', AppConfig::get('BaseUrl'));
+			$this->assignPageVar('strDocsUrl', AppConfig::get('DocsUrl'));
 			$this->assignPageVar('strPageTitle', $strSiteTitle = AppConfig::get('SiteTitle'));
 			$this->assignPageVar('strSiteTitle', $strSiteTitle);
 			$this->assignPageVar('strTheme', $strTheme = AppConfig::get('Theme'));

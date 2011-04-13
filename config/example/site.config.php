@@ -14,6 +14,7 @@
 	//the site urls
 	$arrConfig['SiteUrl'] = 'http://' . $_SERVER['HTTP_HOST'];
 	$arrConfig['ImageUrl'] = 'http://' . $_SERVER['HTTP_HOST'];
+	$arrConfig['DocsUrl'] = 'http://phork.org';
 	$arrConfig['CssUrl'] = '';
 	$arrConfig['JsUrl'] = '';
 	
