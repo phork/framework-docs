@@ -8,7 +8,7 @@ by Phork Labs
 Introduction
 ------------
 
-Phork/docs contains the manuals for the [Phork Framework](http://phork.org) and [Phork/it](http://phorkit.org).
+Phork/docs contains the manuals for the [Phork Framework](http://docs.phorkit.org) and [Phork/it](http://archive.phorkit.org).
 
 
 License

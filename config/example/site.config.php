@@ -14,14 +14,14 @@
 	//the site urls
 	$arrConfig['SiteUrl'] = 'http://' . $_SERVER['HTTP_HOST'];
 	$arrConfig['ImageUrl'] = 'http://' . $_SERVER['HTTP_HOST'];
-	$arrConfig['DocsUrl'] = 'http://phork.org';
+	$arrConfig['DocsUrl'] = 'http://docs.phorkit.org';
 	$arrConfig['CssUrl'] = '';
 	$arrConfig['JsUrl'] = '';
 	
 	//the demo urls
-	$arrConfig['PhorkitUrl'] = 'http://phorkit.org';
-	$arrConfig['StandardUrl'] = 'http://standard.phork.org';
-	$arrConfig['LiteUrl'] = 'http://lite.phork.org';
+	$arrConfig['PhorkitUrl'] = 'http://archive.phorkit.org';
+	$arrConfig['StandardUrl'] = 'http://standard.phorkit.org';
+	$arrConfig['LiteUrl'] = 'http://lite.phorkit.org';
 	
 	//the url of the front controller (no trailing slash) excluding the filename if using mod rewrite
 	$arrConfig['BaseUrl'] = '';
